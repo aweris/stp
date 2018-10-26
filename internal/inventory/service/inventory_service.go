@@ -217,5 +217,5 @@ func (is *inventoryService) DeleteItem(ctx context.Context, itemId uuid.UUID) (*
 		return nil, inventory.ErrInvalidItemId
 	}
 
-	return is.itemRepo.GetItemByID(ctx, itemId)
+	return is.itemRepo.DeleteItem(ctx, itemId)
 }

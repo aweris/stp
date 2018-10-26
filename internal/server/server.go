@@ -1,10 +1,17 @@
 package server
 
-import "github.com/aweris/stp/storage"
+import (
+	"github.com/aweris/stp/internal/inventory"
+	"github.com/aweris/stp/storage"
+
+	inventoryRepo "github.com/aweris/stp/internal/inventory/repository"
+	inventoryService "github.com/aweris/stp/internal/inventory/service"
+)
 
 // Server is a wrapper object for internal services
 type Server struct {
-	db *storage.BoltDB
+	db               *storage.BoltDB
+	InventoryService inventory.InventoryService
 }
 
 // NewServer creates and configures with boltDB storage
@@ -13,8 +20,15 @@ func NewServer(storagePath string) *Server {
 	if err != nil {
 		return nil
 	}
+	cr := inventoryRepo.NewBoltDBCategoryRepository(db)
+	ir := inventoryRepo.NewBoltDBItemRepository(db)
 
-	s := &Server{db: db}
+	is := inventoryService.NewInventoryService(ir, cr)
+
+	s := &Server{
+		db:               db,
+		InventoryService: is,
+	}
 
 	return s
 }
