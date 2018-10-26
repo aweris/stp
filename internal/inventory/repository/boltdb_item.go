@@ -60,7 +60,7 @@ func NewBoltDBItemRepository(db *storage.BoltDB) inventory.ItemRepository {
 	return bir
 }
 
-func (bir *boltDBItemRepository) AddOrUpdateItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error) {
+func (bir *boltDBItemRepository) SaveItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error) {
 	err := bir.db.Update(func(tx *bolt.Tx) error {
 		tb := tx.Bucket([]byte(bucketItem))
 

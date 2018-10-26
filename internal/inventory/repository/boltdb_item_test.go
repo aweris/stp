@@ -18,7 +18,7 @@ const (
 	bucketItemIdxItemCategory = "idx_item_category"
 )
 
-func TestBoltDBItemRepository_AddOrUpdateItem(t *testing.T) {
+func TestBoltDBItemRepository_SaveItem(t *testing.T) {
 	db := storage.NewTestDB()
 	defer db.Close()
 
@@ -37,7 +37,7 @@ func TestBoltDBItemRepository_AddOrUpdateItem(t *testing.T) {
 		Origin:     models.ItemOriginLocal,
 	}
 
-	i, err = r.AddOrUpdateItem(context.Background(), i)
+	i, err = r.SaveItem(context.Background(), i)
 	assert.NoError(t, err, "failed to add item")
 
 	db.BoltDB.View(func(tx *bolt.Tx) error {
@@ -94,7 +94,7 @@ func TestBoltDBItemRepository_GetItemByID_ShouldReturnItem(t *testing.T) {
 		Origin:     models.ItemOriginLocal,
 	}
 
-	i, err = r.AddOrUpdateItem(context.Background(), i)
+	i, err = r.SaveItem(context.Background(), i)
 	assert.NoError(t, err, "failed to add item")
 
 	find, err := r.GetItemByID(context.Background(), itemId)
@@ -131,7 +131,7 @@ func TestBoltDBItemRepository_GetItemsByCategoryID_ShouldReturnItems(t *testing.
 		Origin:     models.ItemOriginLocal,
 	}
 
-	i1, err = r.AddOrUpdateItem(context.Background(), i1)
+	i1, err = r.SaveItem(context.Background(), i1)
 	assert.NoError(t, err, "failed to add item")
 
 	i2 := &models.InventoryItem{
@@ -141,7 +141,7 @@ func TestBoltDBItemRepository_GetItemsByCategoryID_ShouldReturnItems(t *testing.
 		Origin:     models.ItemOriginImported,
 	}
 
-	i2, err = r.AddOrUpdateItem(context.Background(), i2)
+	i2, err = r.SaveItem(context.Background(), i2)
 	assert.NoError(t, err, "failed to add item")
 
 	i3 := &models.InventoryItem{
@@ -151,7 +151,7 @@ func TestBoltDBItemRepository_GetItemsByCategoryID_ShouldReturnItems(t *testing.
 		Origin:     models.ItemOriginLocal,
 	}
 
-	i3, err = r.AddOrUpdateItem(context.Background(), i3)
+	i3, err = r.SaveItem(context.Background(), i3)
 	assert.NoError(t, err, "failed to add item")
 
 	listC1, err := r.GetItemsByCategoryID(context.Background(), categoryId1)
@@ -208,7 +208,7 @@ func TestBoltDBItemRepository_FetchAllItems_ShouldReturnItemList(t *testing.T) {
 		Origin:     models.ItemOriginLocal,
 	}
 
-	i1, err = r.AddOrUpdateItem(context.Background(), i1)
+	i1, err = r.SaveItem(context.Background(), i1)
 	assert.NoError(t, err, "failed to add item")
 
 	i2 := &models.InventoryItem{
@@ -218,7 +218,7 @@ func TestBoltDBItemRepository_FetchAllItems_ShouldReturnItemList(t *testing.T) {
 		Origin:     models.ItemOriginImported,
 	}
 
-	i2, err = r.AddOrUpdateItem(context.Background(), i2)
+	i2, err = r.SaveItem(context.Background(), i2)
 	assert.NoError(t, err, "failed to add item")
 
 	i3 := &models.InventoryItem{
@@ -228,7 +228,7 @@ func TestBoltDBItemRepository_FetchAllItems_ShouldReturnItemList(t *testing.T) {
 		Origin:     models.ItemOriginLocal,
 	}
 
-	i3, err = r.AddOrUpdateItem(context.Background(), i3)
+	i3, err = r.SaveItem(context.Background(), i3)
 	assert.NoError(t, err, "failed to add item")
 
 	list, err := r.FetchAllItems(context.Background())
@@ -270,7 +270,7 @@ func TestBoltDBItemRepository_DeleteItem_ShouldReturnDeletedItem(t *testing.T) {
 		Origin:     models.ItemOriginLocal,
 	}
 
-	i, err = r.AddOrUpdateItem(context.Background(), i)
+	i, err = r.SaveItem(context.Background(), i)
 	assert.NoError(t, err, "failed to add item")
 
 	deleted, err := r.DeleteItem(context.Background(), itemId)

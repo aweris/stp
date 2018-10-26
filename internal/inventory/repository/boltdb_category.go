@@ -60,8 +60,8 @@ func NewBoltDBCategoryRepository(db *storage.BoltDB) inventory.CategoryRepositor
 	return bcr
 }
 
-// AddOrUpdateCategory adding or updating category and related indexes without checking existing value.
-func (bcr *boltDBCategoryRepository) AddOrUpdateCategory(ctx context.Context, cat *models.Category) (*models.Category, error) {
+// SaveCategory adding or updating category and related indexes without checking existing value.
+func (bcr *boltDBCategoryRepository) SaveCategory(ctx context.Context, cat *models.Category) (*models.Category, error) {
 	err := bcr.db.Update(func(tx *bolt.Tx) error {
 		tb := tx.Bucket([]byte(bucketCategory))
 

@@ -20,7 +20,7 @@ const (
 	bucketCategoryIdxName = "idx_category_name"
 )
 
-func TestBoltDBCategoryRepository_AddOrUpdateCategory(t *testing.T) {
+func TestBoltDBCategoryRepository_SaveCategory(t *testing.T) {
 	db := storage.NewTestDB()
 	defer db.Close()
 
@@ -34,7 +34,7 @@ func TestBoltDBCategoryRepository_AddOrUpdateCategory(t *testing.T) {
 		Name: "Test Category",
 	}
 
-	c, err = r.AddOrUpdateCategory(context.Background(), c)
+	c, err = r.SaveCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	db.BoltDB.View(func(tx *bolt.Tx) error {
@@ -70,7 +70,7 @@ func TestBoltDBCategoryRepository_GetCategoryByID_ShouldReturnCategory(t *testin
 		Name: "Test Category",
 	}
 
-	c, err = r.AddOrUpdateCategory(context.Background(), c)
+	c, err = r.SaveCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	find, err := r.GetCategoryByID(context.Background(), id)
@@ -109,7 +109,7 @@ func TestBoltDBCategoryRepository_GetCategoryByName_ShouldReturnCategory(t *test
 		Name: "Test Category",
 	}
 
-	c, err = r.AddOrUpdateCategory(context.Background(), c)
+	c, err = r.SaveCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	find, err := r.GetCategoryByName(context.Background(), "Test category")
@@ -144,7 +144,7 @@ func TestBoltDBCategoryRepository_FetchAllCategories_ShouldReturnCategoryList(t 
 		Name: "Test Category 1",
 	}
 
-	c1, err = r.AddOrUpdateCategory(context.Background(), c1)
+	c1, err = r.SaveCategory(context.Background(), c1)
 	assert.NoError(t, err, "failed to add category")
 
 	id2, err := uuid.NewV1()
@@ -155,7 +155,7 @@ func TestBoltDBCategoryRepository_FetchAllCategories_ShouldReturnCategoryList(t 
 		Name: "Test Category 2",
 	}
 
-	c2, err = r.AddOrUpdateCategory(context.Background(), c2)
+	c2, err = r.SaveCategory(context.Background(), c2)
 
 	list, err := r.FetchAllCategories(context.Background())
 	assert.NoError(t, err, "failed to fetch categories")
@@ -192,7 +192,7 @@ func TestBoltDBCategoryRepository_DeleteCategory_ShouldReturnCategory(t *testing
 		Name: "Test Category",
 	}
 
-	c, err = r.AddOrUpdateCategory(context.Background(), c)
+	c, err = r.SaveCategory(context.Background(), c)
 
 	assert.NoError(t, err, "failed to add category")
 
