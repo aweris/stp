@@ -6,6 +6,7 @@ import (
 	"github.com/aweris/stp/internal/inventory"
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/storage"
+	"github.com/satori/go.uuid"
 	bolt "go.etcd.io/bbolt"
 	"log"
 )
@@ -83,6 +84,24 @@ func (bir *boltDBItemRepository) AddOrUpdateItem(ctx context.Context, i *models.
 		}
 		// adding item id under category index bucket
 		err = idxIC.Put(i.Id.Bytes(), []byte("true"))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return i, err
+}
+
+func (bir *boltDBItemRepository) GetItemByID(ctx context.Context, itemId uuid.UUID) (*models.InventoryItem, error) {
+	var i *models.InventoryItem
+	err := bir.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketItem))
+
+		v := tb.Get(itemId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &i)
 		if err != nil {
 			return err
 		}
