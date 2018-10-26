@@ -6,6 +6,7 @@ import (
 	"github.com/aweris/stp/internal/inventory"
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/storage"
+	"github.com/satori/go.uuid"
 	bolt "go.etcd.io/bbolt"
 	"log"
 	"strings"
@@ -87,4 +88,23 @@ func (bcr *boltDBCategoryRepository) AddOrUpdateCategory(ctx context.Context, ca
 		return nil
 	})
 	return cat, err
+}
+
+
+func (bcr *boltDBCategoryRepository) GetCategoryByID(ctx context.Context, categoryId uuid.UUID) (*models.Category, error) {
+	var t *models.Category
+	err := bcr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketCategory))
+
+		v := tb.Get(categoryId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &t)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return t, err
 }

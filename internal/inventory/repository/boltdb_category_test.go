@@ -20,7 +20,7 @@ const (
 	bucketCategoryIdxName = "idx_category_name"
 )
 
-func TestAddCategory(t *testing.T) {
+func TestBoltDBCategoryRepository_AddOrUpdateCategory(t *testing.T) {
 	db := storage.NewTestDB()
 	defer db.Close()
 
@@ -55,4 +55,47 @@ func TestAddCategory(t *testing.T) {
 		assert.Equal(t, id.Bytes(), idxv)
 		return nil
 	})
+}
+
+func TestBoltDBCategoryRepository_GetCategoryByID_ShouldReturnCategory(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	id, err := uuid.NewV1()
+
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+
+	c, err = r.AddOrUpdateCategory(context.Background(), c)
+
+	assert.NoError(t, err, "failed to add category")
+
+	find, err := r.GetCategoryByID(context.Background(), id)
+
+	assert.NoError(t, err, "failed to find category")
+	assert.Equal(t, find, c, "invalid category")
+}
+
+func TestBoltDBCategoryRepository_GetNoNExistingCategoryByID_ShouldNotReturnError(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	id, err := uuid.NewV1()
+
+	assert.NoError(t, err, "failed to generate id")
+
+	assert.NoError(t, err, "failed to add category")
+
+	find, err := r.GetCategoryByID(context.Background(), id)
+
+	assert.NoError(t, err, "failed to find category")
+	assert.Nil(t, find, "invalid category")
 }
