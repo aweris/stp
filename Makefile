@@ -11,6 +11,11 @@ V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m▶\033[0m")
 
+all: test
+
+test: ; $(info $(M) Running tests ...)
+	$(Q) $(GOTEST) -v ./...
+
 run: ; $(info $(M) Starting Application ...)
 	$(Q) $(GOCMD) run $(STP_MAIN)
 
