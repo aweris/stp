@@ -179,3 +179,73 @@ func TestBoltDBItemRepository_GetItemsByCategoryID_WithNonExistingCategory_Shoul
 	assert.NoError(t, err, "failed to find item")
 	assert.Empty(t, find, "invalid item")
 }
+
+func TestBoltDBItemRepository_FetchAllItems_ShouldReturnItemList(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBItemRepository(db.BoltDB)
+
+	itemId1, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	itemId2, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	categoryId1, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	itemId3, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	categoryId2, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i1 := &models.InventoryItem{
+		Id:         itemId1,
+		Name:       "Test Item - 1",
+		CategoryId: categoryId1,
+		Origin:     models.ItemOriginLocal,
+	}
+
+	i1, err = r.AddOrUpdateItem(context.Background(), i1)
+	assert.NoError(t, err, "failed to add item")
+
+	i2 := &models.InventoryItem{
+		Id:         itemId2,
+		Name:       "Test Item - 2",
+		CategoryId: categoryId1,
+		Origin:     models.ItemOriginImported,
+	}
+
+	i2, err = r.AddOrUpdateItem(context.Background(), i2)
+	assert.NoError(t, err, "failed to add item")
+
+	i3 := &models.InventoryItem{
+		Id:         itemId3,
+		Name:       "Test Item - 3",
+		CategoryId: categoryId2,
+		Origin:     models.ItemOriginLocal,
+	}
+
+	i3, err = r.AddOrUpdateItem(context.Background(), i3)
+	assert.NoError(t, err, "failed to add item")
+
+	list, err := r.FetchAllItems(context.Background())
+	assert.NoError(t, err, "failed to fetch all items")
+
+	assert.NotNil(t, list)
+	assert.Equal(t, 3, len(list))
+}
+func TestBoltDBItemRepository_FetchAllItems_WithNoItem_ShouldReturnEmptyItemList(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBItemRepository(db.BoltDB)
+
+	list, err := r.FetchAllItems(context.Background())
+	assert.NoError(t, err, "failed to fetch all items")
+
+	assert.NotNil(t, list)
+	assert.Empty(t, list)
+}

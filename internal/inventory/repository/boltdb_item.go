@@ -142,3 +142,24 @@ func (bir *boltDBItemRepository) GetItemsByCategoryID(ctx context.Context, categ
 	})
 	return items, err
 }
+
+func (bir *boltDBItemRepository) FetchAllItems(ctx context.Context) ([]*models.InventoryItem, error) {
+	var items = make([]*models.InventoryItem, 0)
+	err := bir.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketItem))
+
+		return tb.ForEach(func(k, v []byte) error {
+			if v == nil {
+				return nil
+			}
+			var i models.InventoryItem
+			err := json.Unmarshal(v, &i)
+			if err != nil {
+				return err
+			}
+			items = append(items, &i)
+			return nil
+		})
+	})
+	return items, err
+}
