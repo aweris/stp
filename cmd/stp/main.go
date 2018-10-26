@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/aweris/stp/api"
+	"github.com/aweris/stp/internal/server"
 	"log"
 	"net/http"
 	"os"
@@ -20,9 +21,9 @@ func main() {
 
 	//TODO : add configuration for server and app settings
 
-	//TODO : init application and api handler
-
-	apiHandler := api.NewHandler()
+	//TODO : move path to config
+	s := server.NewServer("./data/local.store")
+	apiHandler := api.NewHandler(s)
 
 	srv := &http.Server{
 		Addr: "0.0.0.0:8080",

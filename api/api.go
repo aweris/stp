@@ -1,19 +1,21 @@
 package api
 
 import (
+	"github.com/aweris/stp/internal/server"
 	"github.com/gorilla/mux"
 	"net/http"
 	"time"
 )
 
 type ApiHandler struct {
+	server  *server.Server
 	router  *mux.Router
 	timeout time.Duration
 }
 
 // TODO : add services
-func NewHandler() *ApiHandler {
-	api := &ApiHandler{router: mux.NewRouter(), timeout: time.Second * 5}
+func NewHandler(s *server.Server) *ApiHandler {
+	api := &ApiHandler{server: s, router: mux.NewRouter(), timeout: time.Second * 5}
 
 	// initialize routes
 	api.registerHealthCheck()
