@@ -19,4 +19,5 @@ type InventoryService interface {
 	GetItemByID(ctx context.Context, itemId uuid.UUID) (*models.InventoryItem, error)
 	GetItemsByCategoryID(ctx context.Context, categoryId uuid.UUID) ([]*models.InventoryItem, error)
 	FetchAllItems(ctx context.Context) ([]*models.InventoryItem, error)
+	DeleteItem(ctx context.Context, itemId uuid.UUID) (*models.InventoryItem, error)
 }

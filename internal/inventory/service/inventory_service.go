@@ -211,3 +211,11 @@ func (is *inventoryService) GetItemsByCategoryID(ctx context.Context, categoryId
 func (is *inventoryService) FetchAllItems(ctx context.Context) ([]*models.InventoryItem, error) {
 	return is.itemRepo.FetchAllItems(ctx)
 }
+
+func (is *inventoryService) DeleteItem(ctx context.Context, itemId uuid.UUID) (*models.InventoryItem, error) {
+	if itemId == uuid.Nil {
+		return nil, inventory.ErrInvalidItemId
+	}
+
+	return is.itemRepo.GetItemByID(ctx, itemId)
+}
