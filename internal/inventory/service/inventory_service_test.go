@@ -250,3 +250,22 @@ func TestInventoryService_GetCategoryByName_WhenIdIsNil_ShouldReturnError(t *tes
 	_, err := is.GetCategoryByName(context.Background(), "")
 	assert.Equal(t, err, inventory.ErrInvalidCategoryName, "expecting error")
 }
+
+func TestInventoryService_FetchAllCategories_ShouldReturnCategoryList(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	list, err := is.FetchAllCategories(context.Background())
+	assert.NoError(t, err, "failed to find category")
+	assert.Equal(t, 1, len(list))
+}

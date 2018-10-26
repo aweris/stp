@@ -90,3 +90,7 @@ func (is *inventoryService) GetCategoryByName(ctx context.Context, categoryName 
 
 	return is.categoryRepo.GetCategoryByName(ctx, categoryName)
 }
+
+func (is *inventoryService) FetchAllCategories(ctx context.Context) ([]*models.Category, error) {
+	return is.categoryRepo.FetchAllCategories(ctx)
+}
