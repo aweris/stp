@@ -9,7 +9,6 @@ import (
 type ItemOrigin string
 
 const (
-	ItemOriginUnknown  ItemOrigin = "UNKNOWN"
 	ItemOriginImported ItemOrigin = "IMPORT"
 	ItemOriginLocal    ItemOrigin = "LOCAL"
 )
@@ -37,7 +36,7 @@ func (io *ItemOrigin) UnmarshalText(b []byte) error {
 		*io = ItemOrigin(str)
 
 	default:
-		*io = ItemOriginUnknown
+		*io = ItemOriginLocal
 	}
 
 	return nil

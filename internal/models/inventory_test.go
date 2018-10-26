@@ -24,5 +24,5 @@ func TestItemOrigin_UnmarshalText_WhenNotKnownOption_ThenShouldAssignUnknown(t *
 
 	json.Unmarshal([]byte(str), &item)
 
-	assert.Equal(t, item.Origin, models.ItemOriginUnknown)
+	assert.Equal(t, item.Origin, models.ItemOriginLocal)
 }
