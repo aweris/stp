@@ -90,13 +90,41 @@ func (bcr *boltDBCategoryRepository) AddOrUpdateCategory(ctx context.Context, ca
 	return cat, err
 }
 
-
 func (bcr *boltDBCategoryRepository) GetCategoryByID(ctx context.Context, categoryId uuid.UUID) (*models.Category, error) {
 	var t *models.Category
 	err := bcr.db.View(func(tx *bolt.Tx) error {
 		tb := tx.Bucket([]byte(bucketCategory))
 
 		v := tb.Get(categoryId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &t)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return t, err
+}
+
+
+func (bcr *boltDBCategoryRepository) GetCategoryByName(ctx context.Context, categoryName string) (*models.Category, error) {
+	var t *models.Category
+	err := bcr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketCategory))
+
+		// getting tenant name index bucket
+		mb := tb.Bucket([]byte(bucketCategoryMeta))
+		ib := mb.Bucket([]byte(bucketCategoryIdx))
+		idx := ib.Bucket([]byte(bucketCategoryIdxName))
+
+		key := idx.Get([]byte(strings.ToLower(categoryName)))
+		if key == nil {
+			return nil
+		}
+
+		v := tb.Get(key)
 		if v == nil {
 			return nil
 		}

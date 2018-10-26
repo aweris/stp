@@ -89,12 +89,46 @@ func TestBoltDBCategoryRepository_GetNoNExistingCategoryByID_ShouldNotReturnErro
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
 	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	find, err := r.GetCategoryByID(context.Background(), id)
+
+	assert.NoError(t, err, "failed to find category")
+	assert.Nil(t, find, "invalid category")
+}
+
+func TestBoltDBCategoryRepository_GetCategoryByName_ShouldReturnCategory(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	id, err := uuid.NewV1()
 
 	assert.NoError(t, err, "failed to generate id")
 
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+
+	c, err = r.AddOrUpdateCategory(context.Background(), c)
+
 	assert.NoError(t, err, "failed to add category")
 
-	find, err := r.GetCategoryByID(context.Background(), id)
+	find, err := r.GetCategoryByName(context.Background(), "Test category")
+
+	assert.NoError(t, err, "failed to find category")
+	assert.Equal(t, find, c, "invalid category")
+}
+
+func TestBoltDBCategoryRepository_GetNoNExistingCategoryByName_ShouldNotReturnError(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	find, err := r.GetCategoryByName(context.Background(), "Non existing category")
 
 	assert.NoError(t, err, "failed to find category")
 	assert.Nil(t, find, "invalid category")
