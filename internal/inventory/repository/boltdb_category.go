@@ -108,7 +108,6 @@ func (bcr *boltDBCategoryRepository) GetCategoryByID(ctx context.Context, catego
 	return t, err
 }
 
-
 func (bcr *boltDBCategoryRepository) GetCategoryByName(ctx context.Context, categoryName string) (*models.Category, error) {
 	var t *models.Category
 	err := bcr.db.View(func(tx *bolt.Tx) error {
@@ -135,4 +134,26 @@ func (bcr *boltDBCategoryRepository) GetCategoryByName(ctx context.Context, cate
 		return nil
 	})
 	return t, err
+}
+
+
+func (bcr *boltDBCategoryRepository) FetchAllCategories(ctx context.Context) ([]*models.Category, error) {
+	var categories = make([]*models.Category, 0)
+	err := bcr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketCategory))
+
+		return tb.ForEach(func(k, v []byte) error {
+			if v == nil {
+				return nil
+			}
+			var c models.Category
+			err := json.Unmarshal(v, &c)
+			if err != nil {
+				return err
+			}
+			categories = append(categories, &c)
+			return nil
+		})
+	})
+	return categories, err
 }

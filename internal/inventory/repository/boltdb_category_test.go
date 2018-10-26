@@ -82,7 +82,7 @@ func TestBoltDBCategoryRepository_GetCategoryByID_ShouldReturnCategory(t *testin
 	assert.Equal(t, find, c, "invalid category")
 }
 
-func TestBoltDBCategoryRepository_GetNoNExistingCategoryByID_ShouldNotReturnError(t *testing.T) {
+func TestBoltDBCategoryRepository_GetCategoryByID_WithNonExisting_ShouldNotReturnError(t *testing.T) {
 	db := storage.NewTestDB()
 	defer db.Close()
 
@@ -122,7 +122,7 @@ func TestBoltDBCategoryRepository_GetCategoryByName_ShouldReturnCategory(t *test
 	assert.Equal(t, find, c, "invalid category")
 }
 
-func TestBoltDBCategoryRepository_GetNoNExistingCategoryByName_ShouldNotReturnError(t *testing.T) {
+func TestBoltDBCategoryRepository_GetCategoryByName_WithNonExisting_ShouldNotReturnError(t *testing.T) {
 	db := storage.NewTestDB()
 	defer db.Close()
 
@@ -132,4 +132,52 @@ func TestBoltDBCategoryRepository_GetNoNExistingCategoryByName_ShouldNotReturnEr
 
 	assert.NoError(t, err, "failed to find category")
 	assert.Nil(t, find, "invalid category")
+}
+
+func TestBoltDBCategoryRepository_FetchAllCategories_ShouldReturnCategoryList(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	id1, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c1 := &models.Category{
+		Id:   id1,
+		Name: "Test Category 1",
+	}
+
+	c1, err = r.AddOrUpdateCategory(context.Background(), c1)
+
+	assert.NoError(t, err, "failed to add category")
+
+	id2, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c2 := &models.Category{
+		Id:   id2,
+		Name: "Test Category 2",
+	}
+
+	c2, err = r.AddOrUpdateCategory(context.Background(), c2)
+
+	list, err := r.FetchAllCategories(context.Background())
+	assert.NoError(t, err, "failed to fetch categories")
+
+	assert.NotNil(t, list)
+	assert.Equal(t, 2, len(list))
+}
+
+func TestBoltDBCategoryRepository_FetchAllCategories_WithNoCategory_ShouldReturnEmptyCategoryList(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	list, err := r.FetchAllCategories(context.Background())
+	assert.NoError(t, err, "failed to fetch categories")
+
+	assert.NotNil(t, list)
+	assert.Equal(t, 0, len(list))
 }
