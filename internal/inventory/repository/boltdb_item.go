@@ -9,6 +9,7 @@ import (
 	"github.com/satori/go.uuid"
 	bolt "go.etcd.io/bbolt"
 	"log"
+	"strings"
 )
 
 const (
@@ -162,4 +163,44 @@ func (bir *boltDBItemRepository) FetchAllItems(ctx context.Context) ([]*models.I
 		})
 	})
 	return items, err
+}
+
+func (bir *boltDBItemRepository) DeleteItem(ctx context.Context, itemId uuid.UUID) (*models.InventoryItem, error) {
+	var existing *models.InventoryItem
+	err := bir.db.Update(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketItem))
+
+		v := tb.Get(itemId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &existing)
+		if err != nil {
+			return err
+		}
+
+		mb := tb.Bucket([]byte(bucketItemMeta))
+		ib := mb.Bucket([]byte(bucketItemIdx))
+		idx := ib.Bucket([]byte(bucketItemIdxItemCategory))
+
+		err = idx.Delete([]byte(strings.ToLower(existing.Name)))
+		if err != nil {
+			return err
+		}
+
+		// getting index bucket for category
+		idxIC := idx.Bucket(existing.CategoryId.Bytes())
+		if idxIC == nil {
+			return nil
+		}
+
+		// removing item id under category index bucket
+		err = idxIC.Delete(existing.Id.Bytes())
+		if err != nil {
+			return err
+		}
+
+		return tb.Delete(itemId.Bytes())
+	})
+	return existing, err
 }

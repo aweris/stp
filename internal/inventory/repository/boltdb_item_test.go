@@ -249,3 +249,66 @@ func TestBoltDBItemRepository_FetchAllItems_WithNoItem_ShouldReturnEmptyItemList
 	assert.NotNil(t, list)
 	assert.Empty(t, list)
 }
+
+
+func TestBoltDBItemRepository_DeleteItem_ShouldReturnDeletedItem(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBItemRepository(db.BoltDB)
+
+	itemId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i := &models.InventoryItem{
+		Id:         itemId,
+		Name:       "Test Item",
+		CategoryId: categoryId,
+		Origin:     models.ItemOriginLocal,
+	}
+
+	i, err = r.AddOrUpdateItem(context.Background(), i)
+	assert.NoError(t, err, "failed to add item")
+
+	deleted, err := r.DeleteItem(context.Background(), itemId)
+
+	assert.NoError(t, err, "failed to delete item")
+	assert.Equal(t, deleted, i, "invalid item deleted")
+
+	db.BoltDB.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketItem))
+
+		v := tb.Get(itemId.Bytes())
+		assert.Nil(t, v)
+
+		// getting tenant name index bucket
+		mb := tb.Bucket([]byte(bucketItemMeta))
+		ib := mb.Bucket([]byte(bucketItemIdx))
+		idx := ib.Bucket([]byte(bucketItemIdxItemCategory))
+
+		idxIC := idx.Bucket(categoryId.Bytes())
+		assert.NotNil(t, idxIC)
+
+		idxv := idxIC.Get(i.Id.Bytes())
+		assert.Nil(t, idxv)
+		return nil
+	})
+}
+
+func TestBoltDBItemRepository_DeleteItem_WithNonExisting_ShouldNotReturnError(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBItemRepository(db.BoltDB)
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	deleted, err := r.DeleteItem(context.Background(), id)
+
+	assert.NoError(t, err, "failed to delete item")
+	assert.Nil(t, deleted, "should be nil since we'r deleting non existing item")
+}
