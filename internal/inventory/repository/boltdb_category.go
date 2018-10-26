@@ -180,11 +180,6 @@ func (bcr *boltDBCategoryRepository) DeleteCategory(ctx context.Context, categor
 			return err
 		}
 
-		err = tb.Delete(categoryId.Bytes())
-		if err != nil {
-			return err
-		}
-
 		return tb.Delete(categoryId.Bytes())
 	})
 	return existing, err
