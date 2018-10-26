@@ -60,7 +60,7 @@ func TestBoltDBItemRepository_AddOrUpdateItem(t *testing.T) {
 	})
 }
 
-func TestBoltDBCategoryRepository_GetItemByID_WithNonExisting_ShouldNotReturnError(t *testing.T) {
+func TestBoltDBItemRepository_GetItemByID_WithNonExisting_ShouldNotReturnError(t *testing.T) {
 	db := storage.NewTestDB()
 	defer db.Close()
 
@@ -75,7 +75,7 @@ func TestBoltDBCategoryRepository_GetItemByID_WithNonExisting_ShouldNotReturnErr
 	assert.Nil(t, find, "invalid item")
 }
 
-func TestBoltDBCategoryRepository_GetItemByID_ShouldReturnCategory(t *testing.T) {
+func TestBoltDBItemRepository_GetItemByID_ShouldReturnItem(t *testing.T) {
 	db := storage.NewTestDB()
 	defer db.Close()
 
@@ -101,4 +101,81 @@ func TestBoltDBCategoryRepository_GetItemByID_ShouldReturnCategory(t *testing.T)
 
 	assert.NoError(t, err, "failed to find item")
 	assert.Equal(t, find, i, "invalid item")
+}
+
+func TestBoltDBItemRepository_GetItemsByCategoryID_ShouldReturnItems(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBItemRepository(db.BoltDB)
+
+	itemId1, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	itemId2, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	categoryId1, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	itemId3, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	categoryId2, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i1 := &models.InventoryItem{
+		Id:         itemId1,
+		Name:       "Test Item - 1",
+		CategoryId: categoryId1,
+		Origin:     models.ItemOriginLocal,
+	}
+
+	i1, err = r.AddOrUpdateItem(context.Background(), i1)
+	assert.NoError(t, err, "failed to add item")
+
+	i2 := &models.InventoryItem{
+		Id:         itemId2,
+		Name:       "Test Item - 2",
+		CategoryId: categoryId1,
+		Origin:     models.ItemOriginImported,
+	}
+
+	i2, err = r.AddOrUpdateItem(context.Background(), i2)
+	assert.NoError(t, err, "failed to add item")
+
+	i3 := &models.InventoryItem{
+		Id:         itemId3,
+		Name:       "Test Item - 3",
+		CategoryId: categoryId2,
+		Origin:     models.ItemOriginLocal,
+	}
+
+	i3, err = r.AddOrUpdateItem(context.Background(), i3)
+	assert.NoError(t, err, "failed to add item")
+
+	listC1, err := r.GetItemsByCategoryID(context.Background(), categoryId1)
+
+	assert.NotNil(t, listC1)
+	assert.Equal(t, 2, len(listC1))
+
+	listC2, err := r.GetItemsByCategoryID(context.Background(), categoryId2)
+
+	assert.NotNil(t, listC2)
+	assert.Equal(t, 1, len(listC2))
+}
+
+func TestBoltDBItemRepository_GetItemsByCategoryID_WithNonExistingCategory_ShouldNotReturnError(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBItemRepository(db.BoltDB)
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	find, err := r.GetItemsByCategoryID(context.Background(), categoryId)
+
+	assert.NoError(t, err, "failed to find item")
+	assert.Empty(t, find, "invalid item")
 }

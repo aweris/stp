@@ -109,3 +109,36 @@ func (bir *boltDBItemRepository) GetItemByID(ctx context.Context, itemId uuid.UU
 	})
 	return i, err
 }
+
+func (bir *boltDBItemRepository) GetItemsByCategoryID(ctx context.Context, categoryId uuid.UUID) ([]*models.InventoryItem, error) {
+	var items = make([]*models.InventoryItem, 0)
+	err := bir.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketItem))
+
+		// getting index bucket
+		mb := tb.Bucket([]byte(bucketItemMeta))
+		ib := mb.Bucket([]byte(bucketItemIdx))
+		idx := ib.Bucket([]byte(bucketItemIdxItemCategory))
+
+		// creating index bucket for category
+		idxIC := idx.Bucket(categoryId.Bytes())
+		if idxIC == nil {
+			return nil
+		}
+
+		return idxIC.ForEach(func(k, v []byte) error {
+			if v == nil {
+				return nil
+			}
+			var i models.InventoryItem
+			iv := tb.Get(k)
+			err := json.Unmarshal(iv, &i)
+			if err != nil {
+				return err
+			}
+			items = append(items, &i)
+			return nil
+		})
+	})
+	return items, err
+}
