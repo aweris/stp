@@ -199,3 +199,11 @@ func (is *inventoryService) GetItemByID(ctx context.Context, itemId uuid.UUID) (
 
 	return is.itemRepo.GetItemByID(ctx, itemId)
 }
+
+func (is *inventoryService) GetItemsByCategoryID(ctx context.Context, categoryId uuid.UUID) ([]*models.InventoryItem, error) {
+	if categoryId == uuid.Nil {
+		return nil, inventory.ErrInvalidCategoryId
+	}
+
+	return is.itemRepo.GetItemsByCategoryID(ctx, categoryId)
+}

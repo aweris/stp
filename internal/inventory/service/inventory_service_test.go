@@ -706,3 +706,40 @@ func TestInventoryService_GetItemByID_WhenIdIsNil_ShouldReturnError(t *testing.T
 	_, err := is.GetItemByID(context.Background(), uuid.Nil)
 	assert.Equal(t, err, inventory.ErrInvalidItemId, "expecting error")
 }
+
+func TestInventoryService_GetCategoryByName_ShouldReturnList(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	i := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	i, err = is.CreateItem(context.Background(), i)
+	assert.NoError(t, err, "failed to add item")
+
+	find, err := is.GetItemsByCategoryID(context.Background(), id)
+	assert.NoError(t, err, "failed to find category")
+	assert.Equal(t, 1, len(find))
+}
+
+func TestInventoryService_GetItemsByCategoryID_WhenCategoryIdIsEmpty_ThanShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	_, err := is.GetItemsByCategoryID(context.Background(), uuid.Nil)
+	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
+}
