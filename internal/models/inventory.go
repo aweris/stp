@@ -1,7 +1,9 @@
 package models
 
-
-import "github.com/satori/go.uuid"
+import (
+	"github.com/satori/go.uuid"
+	"github.com/shopspring/decimal"
+)
 
 type ItemOrigin string
 
@@ -18,8 +20,9 @@ type Category struct {
 
 // InventoryItem represents the physical good available
 type InventoryItem struct {
-	Id         uuid.UUID  `json:"id"`
-	Name       string     `json:"name"`
-	CategoryId uuid.UUID  `json:"category"`
-	Origin     ItemOrigin `json:"origin"`
+	Id         uuid.UUID       `json:"id"`
+	Name       string          `json:"name"`
+	CategoryId uuid.UUID       `json:"category"`
+	Origin     ItemOrigin      `json:"origin"`
+	Price      decimal.Decimal `json:"price"`
 }

@@ -118,3 +118,76 @@ func (is *inventoryService) DeleteCategory(ctx context.Context, categoryId uuid.
 
 	return is.categoryRepo.DeleteCategory(ctx, categoryId)
 }
+
+func (is *inventoryService) CreateItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error) {
+	if i == nil {
+		return nil, inventory.ErrInvalidParameter
+	}
+	if i.Name == "" {
+		return nil, inventory.ErrInvalidItemName
+	}
+	if i.Price.IsNegative() {
+		return nil, inventory.ErrInvalidItemPrice
+	}
+
+	if i.Id != uuid.Nil {
+		exist, err := is.itemRepo.GetItemByID(ctx, i.Id)
+		if err != nil {
+			return nil, err
+		}
+		if exist != nil {
+			return nil, inventory.ErrInvalidItemId
+		}
+	} else {
+		id, err := uuid.NewV1()
+		if err != nil {
+			return nil, err
+		}
+		i.Id = id
+	}
+
+	category, err := is.categoryRepo.GetCategoryByID(ctx, i.CategoryId)
+	if err != nil {
+		return nil, err
+	}
+	if category == nil {
+		return nil, inventory.ErrInvalidCategoryId
+	}
+
+	return is.itemRepo.SaveItem(ctx, i)
+}
+
+func (is *inventoryService) UpdateItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error) {
+	if i == nil {
+		return nil, inventory.ErrInvalidParameter
+	}
+	if i.Id == uuid.Nil {
+		return nil, inventory.ErrInvalidItemId
+	}
+	if i.Name == "" {
+		return nil, inventory.ErrInvalidItemName
+	}
+	if i.Price.IsNegative() {
+		return nil, inventory.ErrInvalidItemPrice
+	}
+
+	exist, err := is.itemRepo.GetItemByID(ctx, i.Id)
+	if err != nil {
+		return nil, err
+	}
+	if exist == nil {
+		return nil, inventory.ErrInvalidItemId
+	}
+
+	if exist.CategoryId != i.CategoryId {
+		category, err := is.categoryRepo.GetCategoryByID(ctx, i.CategoryId)
+		if err != nil {
+			return nil, err
+		}
+		if category == nil {
+			return nil, inventory.ErrInvalidCategoryId
+		}
+	}
+
+	return is.itemRepo.SaveItem(ctx, i)
+}

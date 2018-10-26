@@ -13,4 +13,7 @@ type InventoryService interface {
 	GetCategoryByName(ctx context.Context, categoryName string) (*models.Category, error)
 	FetchAllCategories(ctx context.Context) ([]*models.Category, error)
 	DeleteCategory(ctx context.Context, categoryId uuid.UUID) (*models.Category, error)
+
+	CreateItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error)
+	UpdateItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error)
 }

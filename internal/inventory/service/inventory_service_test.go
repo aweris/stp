@@ -8,6 +8,7 @@ import (
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/storage"
 	"github.com/satori/go.uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -323,22 +324,348 @@ func TestInventoryService_DeleteCategory_WhenHasItems_ShouldReturnError(t *testi
 	c, err = is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
-	//Build will fail because of this. Inventory Service not supporting item add yet so this will wait a little more
-
-	_ = &models.InventoryItem{
+	i1 := &models.InventoryItem{
 		Name:       "Test Item - 1",
 		CategoryId: c.Id,
 		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
 	}
+	_, err = is.CreateItem(context.Background(), i1)
+	assert.NoError(t, err, "failed to add item")
 
-	_ := &models.InventoryItem{
+	i2 := &models.InventoryItem{
 		Name:       "Test Item - 2",
 		CategoryId: c.Id,
 		Origin:     models.ItemOriginImported,
+		Price:      decimal.NewFromFloat32(10),
+	}
+	_, err = is.CreateItem(context.Background(), i2)
+	assert.NoError(t, err, "failed to add item")
+
+	_, err = is.DeleteCategory(context.Background(), id)
+	assert.Equal(t, err, inventory.ErrCategoryNotEmpty, "expecting error")
+}
+
+func TestInventoryService_CreateItem_ShouldCreateItem(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	i := &models.InventoryItem{
+		Name:       "Test Item - 1",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+	i, err = is.CreateItem(context.Background(), i)
+	assert.NoError(t, err, "failed to add item")
+	assert.NotNil(t, i)
+}
+
+func TestInventoryService_CreateItem_WhenItemIsNil_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	i, err := is.CreateItem(context.Background(), nil)
+	assert.Equal(t, err, inventory.ErrInvalidParameter, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_CreateItem_WhenItemNameIsEmpty_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   categoryId,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	i := &models.InventoryItem{
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
 	}
 
-	deleted, err := is.DeleteCategory(context.Background(), id)
+	i, err = is.CreateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidItemName, "expecting error")
+	assert.Nil(t, i)
+}
 
-	assert.NoError(t, err, "failed to delete category")
-	assert.Equal(t, deleted, c)
+func TestInventoryService_CreateItem_WhenPriceIsNegative_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   categoryId,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	i := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(-10),
+	}
+
+	i, err = is.CreateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidItemPrice, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_CreateItem_WhenIdIsExisting_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   categoryId,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	existing := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	existing, err = is.CreateItem(context.Background(), existing)
+	assert.NoError(t, err, "failed to add item")
+
+	i := &models.InventoryItem{
+		Id:         existing.Id,
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	i, err = is.CreateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidItemId, "expecting error")
+	assert.Nil(t, i)
+
+}
+
+func TestInventoryService_CreateItem_WhenCategoryIdNotExist_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: categoryId,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	i, err = is.CreateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_UpdateItem_ThenShouldUpdate(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   categoryId,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	i := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	i, err = is.CreateItem(context.Background(), i)
+	assert.NoError(t, err, "failed to add item")
+
+	i.Price = decimal.NewFromFloat32(15)
+
+	i, err = is.UpdateItem(context.Background(), i)
+	assert.NoError(t, err, "failed to update item")
+	assert.NotNil(t, i)
+	assert.True(t, i.Price.Equal(decimal.NewFromFloat32(15)))
+}
+
+func TestInventoryService_UpdateItem_WhenItemIsNil_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	i, err := is.UpdateItem(context.Background(), nil)
+	assert.Equal(t, err, inventory.ErrInvalidParameter, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_UpdateItem_WhenItemNameIsEmpty_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   categoryId,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	itemId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i := &models.InventoryItem{
+		Id:         itemId,
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	i, err = is.UpdateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidItemName, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_UpdateItem_WhenPriceIsNegative_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   categoryId,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	itemId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i := &models.InventoryItem{
+		Id:         itemId,
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(-10),
+	}
+
+	i, err = is.UpdateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidItemPrice, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_UpdateItem_WhenIdIsNil_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: categoryId,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	i, err = is.UpdateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidItemId, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_UpdateItem_WhenItemIsNotExist_ThanShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	itemId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i := &models.InventoryItem{
+		Id:         itemId,
+		Name:       "Test Item - 1",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+	i, err = is.UpdateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidItemId, "expecting error")
+	assert.Nil(t, i)
+}
+
+func TestInventoryService_UpdateItem_WhenNewCategoryIdNotExist_ThenShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	categoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   categoryId,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	i := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	i, err = is.CreateItem(context.Background(), i)
+	assert.NoError(t, err, "failed to add item")
+
+	newCategoryId, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	i.CategoryId = newCategoryId
+
+	i, err = is.UpdateItem(context.Background(), i)
+	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
+	assert.Nil(t, i)
 }
