@@ -39,7 +39,7 @@ func (is *inventoryService) CreateCategory(ctx context.Context, cat *models.Cate
 	}
 
 	if cat.Name == "" {
-		return nil , inventory.ErrInvalidCategoryName
+		return nil, inventory.ErrInvalidCategoryName
 	}
 
 	exist, err := is.categoryRepo.GetCategoryByName(ctx, cat.Name)
@@ -61,7 +61,7 @@ func (is *inventoryService) UpdateCategory(ctx context.Context, cat *models.Cate
 		return nil, inventory.ErrInvalidCategoryId
 	}
 	if cat.Name == "" {
-		return nil , inventory.ErrInvalidCategoryName
+		return nil, inventory.ErrInvalidCategoryName
 	}
 
 	exist, err := is.categoryRepo.GetCategoryByID(ctx, cat.Id)
@@ -72,5 +72,13 @@ func (is *inventoryService) UpdateCategory(ctx context.Context, cat *models.Cate
 		return nil, inventory.ErrInvalidCategoryId
 	}
 
-	return is.categoryRepo.SaveCategory(ctx,cat)
+	return is.categoryRepo.SaveCategory(ctx, cat)
+}
+
+func (is *inventoryService) GetCategoryByID(ctx context.Context, categoryId uuid.UUID) (*models.Category, error) {
+	if categoryId == uuid.Nil {
+		return nil, inventory.ErrInvalidCategoryId
+	}
+
+	return is.categoryRepo.GetCategoryByID(ctx, categoryId)
 }
