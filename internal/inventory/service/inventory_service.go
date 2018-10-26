@@ -207,3 +207,7 @@ func (is *inventoryService) GetItemsByCategoryID(ctx context.Context, categoryId
 
 	return is.itemRepo.GetItemsByCategoryID(ctx, categoryId)
 }
+
+func (is *inventoryService) FetchAllItems(ctx context.Context) ([]*models.InventoryItem, error) {
+	return is.itemRepo.FetchAllItems(ctx)
+}
