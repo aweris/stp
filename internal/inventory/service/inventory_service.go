@@ -82,3 +82,11 @@ func (is *inventoryService) GetCategoryByID(ctx context.Context, categoryId uuid
 
 	return is.categoryRepo.GetCategoryByID(ctx, categoryId)
 }
+
+func (is *inventoryService) GetCategoryByName(ctx context.Context, categoryName string) (*models.Category, error) {
+	if categoryName == "" {
+		return nil, inventory.ErrInvalidCategoryName
+	}
+
+	return is.categoryRepo.GetCategoryByName(ctx, categoryName)
+}

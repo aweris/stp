@@ -10,4 +10,5 @@ type InventoryService interface {
 	CreateCategory(ctx context.Context, cat *models.Category) (*models.Category, error)
 	UpdateCategory(ctx context.Context, cat *models.Category) (*models.Category, error)
 	GetCategoryByID(ctx context.Context, categoryId uuid.UUID) (*models.Category, error)
+	GetCategoryByName(ctx context.Context, categoryName string) (*models.Category, error)
 }
