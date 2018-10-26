@@ -27,7 +27,6 @@ func TestBoltDBCategoryRepository_AddOrUpdateCategory(t *testing.T) {
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
 	id, err := uuid.NewV1()
-
 	assert.NoError(t, err, "failed to generate id")
 
 	c := &models.Category{

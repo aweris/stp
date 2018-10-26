@@ -15,4 +15,5 @@ type CategoryRepository interface {
 }
 
 type ItemRepository interface {
+	AddOrUpdateItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error)
 }

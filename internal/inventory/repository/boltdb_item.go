@@ -1,7 +1,10 @@
 package repository
 
 import (
+	"context"
+	"encoding/json"
 	"github.com/aweris/stp/internal/inventory"
+	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/storage"
 	bolt "go.etcd.io/bbolt"
 	"log"
@@ -53,4 +56,37 @@ func NewBoltDBItemRepository(db *storage.BoltDB) inventory.ItemRepository {
 	}
 
 	return bir
+}
+
+func (bir *boltDBItemRepository) AddOrUpdateItem(ctx context.Context, i *models.InventoryItem) (*models.InventoryItem, error) {
+	err := bir.db.Update(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketItem))
+
+		data, err := json.Marshal(i)
+		if err != nil {
+			return err
+		}
+		err = tb.Put(i.Id.Bytes(), data)
+		if err != nil {
+			return err
+		}
+
+		// getting index bucket
+		mb := tb.Bucket([]byte(bucketItemMeta))
+		ib := mb.Bucket([]byte(bucketItemIdx))
+		idx := ib.Bucket([]byte(bucketItemIdxItemCategory))
+
+		// creating index bucket for category
+		idxIC, err := idx.CreateBucketIfNotExists(i.CategoryId.Bytes())
+		if err != nil {
+			return err
+		}
+		// adding item id under category index bucket
+		err = idxIC.Put(i.Id.Bytes(), []byte("true"))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return i, err
 }

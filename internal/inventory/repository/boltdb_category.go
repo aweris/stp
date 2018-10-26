@@ -65,7 +65,6 @@ func (bcr *boltDBCategoryRepository) AddOrUpdateCategory(ctx context.Context, ca
 	err := bcr.db.Update(func(tx *bolt.Tx) error {
 		tb := tx.Bucket([]byte(bucketCategory))
 
-		// put tenant to bucket
 		data, err := json.Marshal(cat)
 		if err != nil {
 			return err
@@ -75,12 +74,10 @@ func (bcr *boltDBCategoryRepository) AddOrUpdateCategory(ctx context.Context, ca
 			return err
 		}
 
-		// getting tenant name index bucket
 		mb := tb.Bucket([]byte(bucketCategoryMeta))
 		ib := mb.Bucket([]byte(bucketCategoryIdx))
 		idx := ib.Bucket([]byte(bucketCategoryIdxName))
 
-		// adding tenant name to bucket
 		err = idx.Put([]byte(strings.ToLower(cat.Name)), cat.Id.Bytes())
 		if err != nil {
 			return err
@@ -115,7 +112,6 @@ func (bcr *boltDBCategoryRepository) GetCategoryByName(ctx context.Context, cate
 	err := bcr.db.View(func(tx *bolt.Tx) error {
 		tb := tx.Bucket([]byte(bucketCategory))
 
-		// getting tenant name index bucket
 		mb := tb.Bucket([]byte(bucketCategoryMeta))
 		ib := mb.Bucket([]byte(bucketCategoryIdx))
 		idx := ib.Bucket([]byte(bucketCategoryIdxName))
