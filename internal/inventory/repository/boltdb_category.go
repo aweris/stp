@@ -49,7 +49,7 @@ func (bcr *boltDBCategoryRepository) init() error {
 	})
 }
 
-// NewBoltDBCategoryRepository creates repository for bolt db
+// NewBoltDBCategoryRepository creates category repository for bolt db
 func NewBoltDBCategoryRepository(db *storage.BoltDB) inventory.CategoryRepository {
 	bcr := &boltDBCategoryRepository{db}
 
@@ -90,6 +90,7 @@ func (bcr *boltDBCategoryRepository) AddOrUpdateCategory(ctx context.Context, ca
 	return cat, err
 }
 
+// GetCategoryByID responsible for fetching category with id
 func (bcr *boltDBCategoryRepository) GetCategoryByID(ctx context.Context, categoryId uuid.UUID) (*models.Category, error) {
 	var t *models.Category
 	err := bcr.db.View(func(tx *bolt.Tx) error {
@@ -108,6 +109,7 @@ func (bcr *boltDBCategoryRepository) GetCategoryByID(ctx context.Context, catego
 	return t, err
 }
 
+// GetCategoryByName responsible for fetching category with name(Name is case insensitive).
 func (bcr *boltDBCategoryRepository) GetCategoryByName(ctx context.Context, categoryName string) (*models.Category, error) {
 	var t *models.Category
 	err := bcr.db.View(func(tx *bolt.Tx) error {
@@ -136,6 +138,7 @@ func (bcr *boltDBCategoryRepository) GetCategoryByName(ctx context.Context, cate
 	return t, err
 }
 
+// FetchAllCategories fetching all categories
 func (bcr *boltDBCategoryRepository) FetchAllCategories(ctx context.Context) ([]*models.Category, error) {
 	var categories = make([]*models.Category, 0)
 	err := bcr.db.View(func(tx *bolt.Tx) error {
@@ -157,7 +160,7 @@ func (bcr *boltDBCategoryRepository) FetchAllCategories(ctx context.Context) ([]
 	return categories, err
 }
 
-
+// DeleteCategory deletes category with id
 func (bcr *boltDBCategoryRepository) DeleteCategory(ctx context.Context, categoryId uuid.UUID) (*models.Category, error) {
 	var existing *models.Category
 	err := bcr.db.Update(func(tx *bolt.Tx) error {
