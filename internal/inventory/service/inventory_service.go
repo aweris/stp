@@ -94,3 +94,27 @@ func (is *inventoryService) GetCategoryByName(ctx context.Context, categoryName 
 func (is *inventoryService) FetchAllCategories(ctx context.Context) ([]*models.Category, error) {
 	return is.categoryRepo.FetchAllCategories(ctx)
 }
+
+func (is *inventoryService) DeleteCategory(ctx context.Context, categoryId uuid.UUID) (*models.Category, error) {
+	if categoryId == uuid.Nil {
+		return nil, inventory.ErrInvalidCategoryId
+	}
+
+	exist, err := is.categoryRepo.GetCategoryByID(ctx, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	if exist == nil {
+		return nil, inventory.ErrInvalidCategoryId
+	}
+
+	items, err := is.itemRepo.GetItemsByCategoryID(ctx, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) > 0 {
+		return nil, inventory.ErrCategoryNotEmpty
+	}
+
+	return is.categoryRepo.DeleteCategory(ctx, categoryId)
+}

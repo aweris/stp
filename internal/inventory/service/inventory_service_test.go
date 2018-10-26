@@ -269,3 +269,76 @@ func TestInventoryService_FetchAllCategories_ShouldReturnCategoryList(t *testing
 	assert.NoError(t, err, "failed to find category")
 	assert.Equal(t, 1, len(list))
 }
+
+func TestInventoryService_DeleteCategory_WhenCategoryExistAndEmpty_ShouldDeleteCategory(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	deleted, err := is.DeleteCategory(context.Background(), id)
+
+	assert.NoError(t, err, "failed to delete category")
+	assert.Equal(t, deleted, c)
+}
+
+func TestInventoryService_DeleteCategory_WhenIdIsNil_ShouldReturnErr(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	_, err := is.DeleteCategory(context.Background(), uuid.Nil)
+	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
+}
+
+func TestInventoryService_DeleteCategory_WhenIdIsNotExist_ShouldReturnErr(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	_, err = is.DeleteCategory(context.Background(), id)
+	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
+}
+
+func TestInventoryService_DeleteCategory_WhenHasItems_ShouldReturnError(t *testing.T) {
+	is := newMockedService()
+	defer is.Close()
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+	c, err = is.CreateCategory(context.Background(), c)
+	assert.NoError(t, err, "failed to add category")
+
+	//Build will fail because of this. Inventory Service not supporting item add yet so this will wait a little more
+
+	_ = &models.InventoryItem{
+		Name:       "Test Item - 1",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+	}
+
+	_ := &models.InventoryItem{
+		Name:       "Test Item - 2",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginImported,
+	}
+
+	deleted, err := is.DeleteCategory(context.Background(), id)
+
+	assert.NoError(t, err, "failed to delete category")
+	assert.Equal(t, deleted, c)
+}
