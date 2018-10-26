@@ -174,7 +174,7 @@ func TestBoltDBCategoryRepository_FetchAllCategories_WithNoCategory_ShouldReturn
 	assert.NoError(t, err, "failed to fetch categories")
 
 	assert.NotNil(t, list)
-	assert.Equal(t, 0, len(list))
+	assert.Empty(t, list)
 }
 
 func TestBoltDBCategoryRepository_DeleteCategory_ShouldReturnCategory(t *testing.T) {
