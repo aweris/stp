@@ -191,3 +191,11 @@ func (is *inventoryService) UpdateItem(ctx context.Context, i *models.InventoryI
 
 	return is.itemRepo.SaveItem(ctx, i)
 }
+
+func (is *inventoryService) GetItemByID(ctx context.Context, itemId uuid.UUID) (*models.InventoryItem, error) {
+	if itemId == uuid.Nil {
+		return nil, inventory.ErrInvalidItemId
+	}
+
+	return is.itemRepo.GetItemByID(ctx, itemId)
+}
