@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/aweris/stp/api"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +19,10 @@ func main() {
 	log.Println("stp - starting ...")
 
 	//TODO : add configuration for server and app settings
+
 	//TODO : init application and api handler
+
+	apiHandler := api.NewHandler()
 
 	srv := &http.Server{
 		Addr: "0.0.0.0:8080",
@@ -26,7 +30,7 @@ func main() {
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		//Handler:      apiHandler, // Pass our instance of gorilla/mux in.
+		Handler:      apiHandler, // Pass our instance of api
 	}
 
 	// Run our server in a goroutine so that it doesn't block.
