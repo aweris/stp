@@ -36,7 +36,6 @@ func TestBoltDBCategoryRepository_AddOrUpdateCategory(t *testing.T) {
 	}
 
 	c, err = r.AddOrUpdateCategory(context.Background(), c)
-
 	assert.NoError(t, err, "failed to add category")
 
 	db.BoltDB.View(func(tx *bolt.Tx) error {
@@ -73,7 +72,6 @@ func TestBoltDBCategoryRepository_GetCategoryByID_ShouldReturnCategory(t *testin
 	}
 
 	c, err = r.AddOrUpdateCategory(context.Background(), c)
-
 	assert.NoError(t, err, "failed to add category")
 
 	find, err := r.GetCategoryByID(context.Background(), id)
@@ -113,7 +111,6 @@ func TestBoltDBCategoryRepository_GetCategoryByName_ShouldReturnCategory(t *test
 	}
 
 	c, err = r.AddOrUpdateCategory(context.Background(), c)
-
 	assert.NoError(t, err, "failed to add category")
 
 	find, err := r.GetCategoryByName(context.Background(), "Test category")
@@ -149,7 +146,6 @@ func TestBoltDBCategoryRepository_FetchAllCategories_ShouldReturnCategoryList(t 
 	}
 
 	c1, err = r.AddOrUpdateCategory(context.Background(), c1)
-
 	assert.NoError(t, err, "failed to add category")
 
 	id2, err := uuid.NewV1()
@@ -180,4 +176,62 @@ func TestBoltDBCategoryRepository_FetchAllCategories_WithNoCategory_ShouldReturn
 
 	assert.NotNil(t, list)
 	assert.Equal(t, 0, len(list))
+}
+
+func TestBoltDBCategoryRepository_DeleteCategory_ShouldReturnCategory(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	id, err := uuid.NewV1()
+
+	assert.NoError(t, err, "failed to generate id")
+
+	c := &models.Category{
+		Id:   id,
+		Name: "Test Category",
+	}
+
+	c, err = r.AddOrUpdateCategory(context.Background(), c)
+
+	assert.NoError(t, err, "failed to add category")
+
+	deleted, err := r.DeleteCategory(context.Background(), id)
+
+	assert.NoError(t, err, "failed to delete category")
+	assert.Equal(t, deleted, c, "invalid category deleted")
+
+	//Check DB for deletion
+	db.BoltDB.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketCategory))
+
+		v := tb.Get(id.Bytes())
+
+		assert.Nil(t, v)
+
+		// getting tenant name index bucket
+		mb := tb.Bucket([]byte(bucketCategoryMeta))
+		ib := mb.Bucket([]byte(bucketCategoryIdx))
+		idx := ib.Bucket([]byte(bucketCategoryIdxName))
+
+		idxv := idx.Get([]byte(strings.ToLower(c.Name)))
+		assert.Nil(t, idxv)
+		return nil
+	})
+}
+
+func TestBoltDBCategoryRepository_DeleteCategory_WithNonExisting_ShouldNotReturnError(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
+
+	id, err := uuid.NewV1()
+	assert.NoError(t, err, "failed to generate id")
+
+	deleted, err := r.DeleteCategory(context.Background(), id)
+
+	assert.NoError(t, err, "failed to delete category")
+	assert.Nil(t, deleted, "should be nil since we'r deleting non existing category")
 }

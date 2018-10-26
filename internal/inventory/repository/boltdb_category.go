@@ -136,7 +136,6 @@ func (bcr *boltDBCategoryRepository) GetCategoryByName(ctx context.Context, cate
 	return t, err
 }
 
-
 func (bcr *boltDBCategoryRepository) FetchAllCategories(ctx context.Context) ([]*models.Category, error) {
 	var categories = make([]*models.Category, 0)
 	err := bcr.db.View(func(tx *bolt.Tx) error {
@@ -156,4 +155,38 @@ func (bcr *boltDBCategoryRepository) FetchAllCategories(ctx context.Context) ([]
 		})
 	})
 	return categories, err
+}
+
+
+func (bcr *boltDBCategoryRepository) DeleteCategory(ctx context.Context, categoryId uuid.UUID) (*models.Category, error) {
+	var existing *models.Category
+	err := bcr.db.Update(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketCategory))
+
+		v := tb.Get(categoryId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &existing)
+		if err != nil {
+			return err
+		}
+
+		mb := tb.Bucket([]byte(bucketCategoryMeta))
+		ib := mb.Bucket([]byte(bucketCategoryIdx))
+		idx := ib.Bucket([]byte(bucketCategoryIdxName))
+
+		err = idx.Delete([]byte(strings.ToLower(existing.Name)))
+		if err != nil {
+			return err
+		}
+
+		err = tb.Delete(categoryId.Bytes())
+		if err != nil {
+			return err
+		}
+
+		return tb.Delete(categoryId.Bytes())
+	})
+	return existing, err
 }
