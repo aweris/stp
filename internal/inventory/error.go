@@ -9,7 +9,8 @@ var (
 	ErrInvalidCategoryName = errors.New("invalid category name")
 	ErrCategoryNotEmpty    = errors.New("category is not empty")
 
-	ErrInvalidItemId    = errors.New("invalid item id")
-	ErrInvalidItemName  = errors.New("invalid item name")
-	ErrInvalidItemPrice = errors.New("invalid item price")
+	ErrInvalidItemId     = errors.New("invalid item id")
+	ErrInvalidItemName   = errors.New("invalid item name")
+	ErrInvalidItemPrice  = errors.New("invalid item price")
+	ErrInvalidItemOrigin = errors.New("invalid item origin")
 )

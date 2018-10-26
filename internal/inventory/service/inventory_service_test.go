@@ -327,7 +327,7 @@ func TestInventoryService_DeleteCategory_WhenHasItems_ShouldReturnError(t *testi
 	i1 := &models.InventoryItem{
 		Name:       "Test Item - 1",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 	_, err = is.CreateItem(context.Background(), i1)
@@ -336,7 +336,7 @@ func TestInventoryService_DeleteCategory_WhenHasItems_ShouldReturnError(t *testi
 	i2 := &models.InventoryItem{
 		Name:       "Test Item - 2",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginImported,
+		Imported:   true,
 		Price:      decimal.NewFromFloat32(10),
 	}
 	_, err = is.CreateItem(context.Background(), i2)
@@ -363,7 +363,7 @@ func TestInventoryService_CreateItem_ShouldCreateItem(t *testing.T) {
 	i := &models.InventoryItem{
 		Name:       "Test Item - 1",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 	i, err = is.CreateItem(context.Background(), i)
@@ -396,7 +396,7 @@ func TestInventoryService_CreateItem_WhenItemNameIsEmpty_ThenShouldReturnError(t
 
 	i := &models.InventoryItem{
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -422,7 +422,7 @@ func TestInventoryService_CreateItem_WhenPriceIsNegative_ThenShouldReturnError(t
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(-10),
 	}
 
@@ -448,7 +448,7 @@ func TestInventoryService_CreateItem_WhenIdIsExisting_ThenShouldReturnError(t *t
 	existing := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -459,7 +459,7 @@ func TestInventoryService_CreateItem_WhenIdIsExisting_ThenShouldReturnError(t *t
 		Id:         existing.Id,
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -479,7 +479,7 @@ func TestInventoryService_CreateItem_WhenCategoryIdNotExist_ThenShouldReturnErro
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: categoryId,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -505,7 +505,7 @@ func TestInventoryService_UpdateItem_ThenShouldUpdate(t *testing.T) {
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -549,7 +549,7 @@ func TestInventoryService_UpdateItem_WhenItemNameIsEmpty_ThenShouldReturnError(t
 	i := &models.InventoryItem{
 		Id:         itemId,
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -579,7 +579,7 @@ func TestInventoryService_UpdateItem_WhenPriceIsNegative_ThenShouldReturnError(t
 		Id:         itemId,
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(-10),
 	}
 
@@ -598,7 +598,7 @@ func TestInventoryService_UpdateItem_WhenIdIsNil_ThenShouldReturnError(t *testin
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: categoryId,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -628,7 +628,7 @@ func TestInventoryService_UpdateItem_WhenItemIsNotExist_ThanShouldReturnError(t 
 		Id:         itemId,
 		Name:       "Test Item - 1",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 	i, err = is.UpdateItem(context.Background(), i)
@@ -653,7 +653,7 @@ func TestInventoryService_UpdateItem_WhenNewCategoryIdNotExist_ThenShouldReturnE
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -687,7 +687,7 @@ func TestInventoryService_GetItemByID_ShouldReturnItem(t *testing.T) {
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -724,7 +724,7 @@ func TestInventoryService_GetCategoryByName_ShouldReturnList(t *testing.T) {
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -761,7 +761,7 @@ func TestInventoryService_FetchAllItems_ThanReturnItems(t *testing.T) {
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -790,7 +790,7 @@ func TestInventoryService_DeleteItem_ThanShouldDeleteItem(t *testing.T) {
 	i := &models.InventoryItem{
 		Name:       "Test Item",
 		CategoryId: c.Id,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 

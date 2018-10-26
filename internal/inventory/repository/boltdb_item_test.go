@@ -35,7 +35,7 @@ func TestBoltDBItemRepository_SaveItem(t *testing.T) {
 		Id:         itemId,
 		Name:       "Test Item",
 		CategoryId: categoryId,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -93,7 +93,7 @@ func TestBoltDBItemRepository_GetItemByID_ShouldReturnItem(t *testing.T) {
 		Id:         itemId,
 		Name:       "Test Item",
 		CategoryId: categoryId,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -131,7 +131,7 @@ func TestBoltDBItemRepository_GetItemsByCategoryID_ShouldReturnItems(t *testing.
 		Id:         itemId1,
 		Name:       "Test Item - 1",
 		CategoryId: categoryId1,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -142,7 +142,7 @@ func TestBoltDBItemRepository_GetItemsByCategoryID_ShouldReturnItems(t *testing.
 		Id:         itemId2,
 		Name:       "Test Item - 2",
 		CategoryId: categoryId1,
-		Origin:     models.ItemOriginImported,
+		Imported:   true,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -153,7 +153,7 @@ func TestBoltDBItemRepository_GetItemsByCategoryID_ShouldReturnItems(t *testing.
 		Id:         itemId3,
 		Name:       "Test Item - 3",
 		CategoryId: categoryId2,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -211,7 +211,7 @@ func TestBoltDBItemRepository_FetchAllItems_ShouldReturnItemList(t *testing.T) {
 		Id:         itemId1,
 		Name:       "Test Item - 1",
 		CategoryId: categoryId1,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -222,7 +222,7 @@ func TestBoltDBItemRepository_FetchAllItems_ShouldReturnItemList(t *testing.T) {
 		Id:         itemId2,
 		Name:       "Test Item - 2",
 		CategoryId: categoryId1,
-		Origin:     models.ItemOriginImported,
+		Imported:   true,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -233,7 +233,7 @@ func TestBoltDBItemRepository_FetchAllItems_ShouldReturnItemList(t *testing.T) {
 		Id:         itemId3,
 		Name:       "Test Item - 3",
 		CategoryId: categoryId2,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
@@ -275,7 +275,7 @@ func TestBoltDBItemRepository_DeleteItem_ShouldReturnDeletedItem(t *testing.T) {
 		Id:         itemId,
 		Name:       "Test Item",
 		CategoryId: categoryId,
-		Origin:     models.ItemOriginLocal,
+		Imported:   false,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
