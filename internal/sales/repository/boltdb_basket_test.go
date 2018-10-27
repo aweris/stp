@@ -7,6 +7,7 @@ import (
 	"github.com/aweris/stp/storage"
 	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
+	"go.etcd.io/bbolt"
 	"testing"
 )
 
@@ -28,4 +29,11 @@ func TestBoltDBBasketRepository_SaveBasket(t *testing.T) {
 	b, err := r.SaveBasket(context.Background(), b)
 	assert.NoError(t, err)
 	assert.NotNil(t, b)
+
+	db.BoltDB.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketBasket))
+		v := tb.Get(b.Id.Bytes())
+		assert.NotNil(t, v)
+		return nil
+	})
 }
