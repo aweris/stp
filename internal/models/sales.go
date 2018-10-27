@@ -12,13 +12,13 @@ const (
 
 // Basket represents a record of the items that customer have chosen to buy
 type Basket struct {
-	Id    uuid.UUID              `json:"id"`
-	Items map[uuid.UUID]SaleItem `json:"items"`
-	State BasketState            `json:"state"`
+	Id    uuid.UUID                 `json:"id"`
+	Items map[uuid.UUID]*BasketItem `json:"items"`
+	State BasketState               `json:"state"`
 }
 
 type BasketItem struct {
-	SaleItem
+	*SaleItem
 
 	Count int `json:"count"`
 }

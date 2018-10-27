@@ -6,5 +6,6 @@ import (
 )
 
 type SalesService interface {
-	CreateBasket(ctx context.Context) (*uuid.UUID, error)
+	CreateBasket(ctx context.Context) (uuid.UUID, error)
+	AddItem(ctx context.Context, basketId uuid.UUID, itemId uuid.UUID, itemCount int) (error)
 }
