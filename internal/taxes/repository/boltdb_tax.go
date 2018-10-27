@@ -12,10 +12,7 @@ import (
 )
 
 const (
-	bucketTax            = "taxes_tax"
-	bucketTaxMeta        = "_meta"
-	bucketTaxIdx         = "index"
-	bucketTaxIdxCategory = "idx_category"
+	bucketTax = "taxes_tax"
 )
 
 type boltDBTaxRepository struct {
@@ -24,25 +21,10 @@ type boltDBTaxRepository struct {
 
 func (tr *boltDBTaxRepository) init() error {
 	return tr.db.Update(func(tx *bolt.Tx) error {
-		tb, err := tx.CreateBucketIfNotExists([]byte(bucketTax))
+		_, err := tx.CreateBucketIfNotExists([]byte(bucketTax))
 		if err != nil {
 			return err
 		}
-		mt, err := tb.CreateBucketIfNotExists([]byte(bucketTaxMeta))
-		if err != nil {
-			return err
-		}
-
-		ib, err := mt.CreateBucketIfNotExists([]byte(bucketTaxIdx))
-		if err != nil {
-			return err
-		}
-
-		_, err = ib.CreateBucketIfNotExists([]byte(bucketTaxIdxCategory))
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 }
@@ -66,34 +48,6 @@ func (btr *boltDBTaxRepository) SaveTax(ctx context.Context, tax *models.Tax) (*
 			return err
 		}
 
-		// avoid unnecessary bucket access
-		if len(tax.Categories) > 0 {
-			mb := tb.Bucket([]byte(bucketTaxMeta))
-			ib := mb.Bucket([]byte(bucketTaxIdx))
-			idx := ib.Bucket([]byte(bucketTaxIdxCategory))
-
-			idxIC := idx.Bucket(tax.Id.Bytes())
-
-			//Just workaround update all indexes since performance isn't problem in our case
-			if idxIC != nil {
-				idx.DeleteBucket(tax.Id.Bytes())
-			}
-
-			// creating index bucket for category
-			idxIC, err = idx.CreateBucket(tax.Id.Bytes())
-			if err != nil {
-				return err
-			}
-
-			// Adding categories to index
-			for _, k := range tax.Categories {
-				err = idxIC.Put(k.Bytes(), []byte("true"))
-				if err != nil {
-					return err
-				}
-			}
-		}
-
 		return tb.Put(tax.Id.Bytes(), data)
 	})
 	return tax, err
@@ -115,4 +69,38 @@ func (tr *boltDBTaxRepository) GetTaxByID(ctx context.Context, taxId uuid.UUID) 
 		return nil
 	})
 	return tax, err
+}
+
+func (tr *boltDBTaxRepository) GetTaxesByItemOriginAndCategory(ctx context.Context, origin models.ItemOrigin, categoryId uuid.UUID) ([]*models.Tax, error) {
+	var txs = make([]*models.Tax, 0)
+	err := tr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketTax))
+
+		tb.ForEach(func(k, v []byte) error {
+			var tax *models.Tax
+			err := json.Unmarshal(v, &tax)
+			if err != nil {
+				return err
+			}
+
+			if string(tax.Origin) == string(origin) || tax.Origin == models.TaxOriginAll {
+				if (tax.Condition == models.UnknownTC) {
+					txs = append(txs, tax)
+					return nil
+				}
+
+				exist := tax.Categories[categoryId]
+
+				if (tax.Condition == models.SubjectToTax && exist) || (tax.Condition == models.ExemptToTax && !exist) {
+					txs = append(txs, tax)
+					return nil
+				}
+			}
+
+			return nil
+		})
+
+		return nil
+	})
+	return txs, err
 }

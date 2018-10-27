@@ -31,11 +31,7 @@ func (is *inventoryService) CreateCategory(ctx context.Context, cat *models.Cate
 			return nil, inventory.ErrInvalidCategoryId
 		}
 	} else {
-		id, err := uuid.NewV1()
-		if err != nil {
-			return nil, err
-		}
-		cat.Id = id
+		cat.Id = uuid.NewV1()
 	}
 
 	if cat.Name == "" {
@@ -139,11 +135,7 @@ func (is *inventoryService) CreateItem(ctx context.Context, i *models.InventoryI
 			return nil, inventory.ErrInvalidItemId
 		}
 	} else {
-		id, err := uuid.NewV1()
-		if err != nil {
-			return nil, err
-		}
-		i.Id = id
+		i.Id = uuid.NewV1()
 	}
 
 	category, err := is.categoryRepo.GetCategoryByID(ctx, i.CategoryId)

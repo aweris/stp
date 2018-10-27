@@ -35,8 +35,8 @@ type Tax struct {
 }
 
 type TaxScope struct {
-	Condition  TaxCondition `json:"condition"`
-	Categories []uuid.UUID  `json:"categories"`
+	Condition  TaxCondition       `json:"condition"`
+	Categories map[uuid.UUID]bool `json:"categories"`
 }
 
 func (tt *TaxOrigin) UnmarshalText(b []byte) error {
