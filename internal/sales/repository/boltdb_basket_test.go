@@ -69,3 +69,22 @@ func TestBoltDBBasketRepository_GetBasketByID_WhenIDExistInDB_ThanShouldReturnBa
 	assert.NoError(t, err)
 	assert.NotNil(t, find)
 }
+
+func TestBoltDBBasketRepository_FetchAllBaskets(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := basketRepository.NewBoltDBBasketRepository(db.BoltDB)
+
+	b := &models.Basket{
+		Id:    uuid.NewV1(),
+		State: models.BasketStateOpened,
+	}
+
+	b, err := r.SaveBasket(context.Background(), b)
+	assert.NoError(t, err)
+
+	list, err := r.FetchAllBaskets(context.Background())
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(list))
+}
