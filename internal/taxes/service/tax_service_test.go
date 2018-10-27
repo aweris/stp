@@ -285,3 +285,33 @@ func TestTaxService_UpdateTax_ShouldUpdate(t *testing.T) {
 	assert.NotNil(t, tax)
 	assert.Equal(t, tax.Name, "New Name")
 }
+
+func TestTaxService_GetTaxByID_WhenIdIsNil_ThenShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	_, err := ts.GetTaxByID(context.Background(), uuid.Nil)
+	assert.Equal(t, err, taxes.ErrInvalidTaxId)
+}
+
+func TestTaxService_GetTaxByID_ShouldReturnTax(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Will be Updated",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
+		},
+	}
+	tax, err := ts.TaxService.CreateTax(context.Background(), tax)
+	assert.NoError(t, err)
+
+	find, err := ts.GetTaxByID(context.Background(), tax.Id)
+	assert.NoError(t, err)
+	assert.NotNil(t, find)
+}

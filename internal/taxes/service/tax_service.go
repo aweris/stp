@@ -66,3 +66,11 @@ func (ts *taxService) UpdateTax(ctx context.Context, tax *models.Tax) (*models.T
 
 	return ts.taxRepo.SaveTax(ctx, tax)
 }
+
+func (ts *taxService) GetTaxByID(ctx context.Context, taxId uuid.UUID) (*models.Tax, error) {
+	if taxId == uuid.Nil {
+		return nil, taxes.ErrInvalidTaxId
+	}
+
+	return ts.taxRepo.GetTaxByID(ctx, taxId)
+}
