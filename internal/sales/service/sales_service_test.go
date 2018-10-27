@@ -330,3 +330,52 @@ func TestSalesService_RemoveItem_WhenBasketIdNotExist_ThanShouldReturnErr(t *tes
 	err := ts.RemoveItem(ctx, uuid.NewV1(), uuid.NewV1(), 2)
 	assert.Equal(t, sales.ErrInvalidBasketId, err)
 }
+
+func TestSalesService_CancelBasket_WhenBasketIdIsNil_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	err := ts.CancelBasket(ctx, uuid.Nil)
+	assert.Equal(t, sales.ErrInvalidBasketId, err)
+}
+
+func TestSalesService_CancelBasket_WhenBasketIdNotExist_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	err := ts.CancelBasket(ctx, uuid.NewV1())
+	assert.Equal(t, sales.ErrInvalidBasketId, err)
+}
+
+func TestSalesService_CancelBasket_WhenBasketAlreadyClosedOrCanceled_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.CancelBasket(ctx, bid)
+	assert.NoError(t, err)
+
+	err = ts.CancelBasket(ctx, bid)
+	assert.Equal(t, sales.ErrBasketNotOpen, err)
+}
+
+func TestSalesService_CancelBasket(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.CancelBasket(ctx, bid)
+	assert.NoError(t, err)
+}

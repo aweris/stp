@@ -131,3 +131,25 @@ func (ss *salesService) RemoveItem(ctx context.Context, basketId uuid.UUID, item
 
 	return nil
 }
+
+func (ss *salesService) CancelBasket(ctx context.Context, basketId uuid.UUID) (error) {
+	if basketId == uuid.Nil {
+		return sales.ErrInvalidBasketId
+	}
+	basket, err := ss.basketRepo.GetBasketByID(ctx, basketId)
+	if err != nil {
+		return err
+	}
+	if basket == nil {
+		return sales.ErrInvalidBasketId
+	}
+
+	if basket.State != models.BasketStateOpened {
+		return sales.ErrBasketNotOpen
+	}
+
+	basket.State = models.BasketStateCancelled
+
+	_, err = ss.basketRepo.SaveBasket(ctx, basket)
+	return err
+}

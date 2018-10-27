@@ -7,4 +7,5 @@ var (
 
 	ErrInvalidBasketId  = errors.New("invalid parameter")
 	ErrInvalidItemCount = errors.New("invalid item count")
+	ErrBasketNotOpen    = errors.New("basket not open")
 )
