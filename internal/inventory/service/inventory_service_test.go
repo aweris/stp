@@ -38,15 +38,12 @@ func TestInventoryService_CreateCategory_WithNewId_ShouldCreateOne(t *testing.T)
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
 
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 	assert.NotNil(t, c)
 }
@@ -69,18 +66,15 @@ func TestInventoryService_CreateCategory_WithExistingId_ShouldReturnError(t *tes
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	existing := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	existing, err = is.CreateCategory(context.Background(), existing)
+	existing, err := is.CreateCategory(context.Background(), existing)
 	assert.NoError(t, err, "failed to add category")
 
 	c := &models.Category{
-		Id:   id,
+		Id:   existing.Id,
 		Name: "Test Category Invalid Id",
 	}
 
@@ -127,14 +121,11 @@ func TestInventoryService_UpdateCategory_ShouldUpdate(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	c.Name = "Updated Test Category"
@@ -149,15 +140,12 @@ func TestInventoryService_UpdateCategory_WithNewId_ShouldReturnError(t *testing.
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
 
-	c, err = is.UpdateCategory(context.Background(), c)
+	c, err := is.UpdateCategory(context.Background(), c)
 	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error for id")
 }
 
@@ -177,14 +165,11 @@ func TestInventoryService_UpdateCategory_WithEmptyName_ShouldReturnError(t *test
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	c.Name = ""
@@ -205,17 +190,14 @@ func TestInventoryService_GetCategoryByID_ShouldReturnCategory(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
-	find, err := is.GetCategoryByID(context.Background(), id)
+	find, err := is.GetCategoryByID(context.Background(), c.Id)
 	assert.NoError(t, err, "failed to find category")
 	assert.Equal(t, c, find)
 }
@@ -256,14 +238,11 @@ func TestInventoryService_FetchAllCategories_ShouldReturnCategoryList(t *testing
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	list, err := is.FetchAllCategories(context.Background())
@@ -275,17 +254,14 @@ func TestInventoryService_DeleteCategory_WhenCategoryExistAndEmpty_ShouldDeleteC
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
-	deleted, err := is.DeleteCategory(context.Background(), id)
+	deleted, err := is.DeleteCategory(context.Background(), c.Id)
 
 	assert.NoError(t, err, "failed to delete category")
 	assert.Equal(t, deleted, c)
@@ -303,10 +279,7 @@ func TestInventoryService_DeleteCategory_WhenIdIsNotExist_ShouldReturnErr(t *tes
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
-	_, err = is.DeleteCategory(context.Background(), id)
+	_, err := is.DeleteCategory(context.Background(), uuid.NewV1())
 	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
 }
 
@@ -314,14 +287,11 @@ func TestInventoryService_DeleteCategory_WhenHasItems_ShouldReturnError(t *testi
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i1 := &models.InventoryItem{
@@ -342,7 +312,7 @@ func TestInventoryService_DeleteCategory_WhenHasItems_ShouldReturnError(t *testi
 	_, err = is.CreateItem(context.Background(), i2)
 	assert.NoError(t, err, "failed to add item")
 
-	_, err = is.DeleteCategory(context.Background(), id)
+	_, err = is.DeleteCategory(context.Background(), c.Id)
 	assert.Equal(t, err, inventory.ErrCategoryNotEmpty, "expecting error")
 }
 
@@ -350,14 +320,11 @@ func TestInventoryService_CreateItem_ShouldCreateItem(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -384,14 +351,11 @@ func TestInventoryService_CreateItem_WhenItemNameIsEmpty_ThenShouldReturnError(t
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   categoryId,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -409,14 +373,11 @@ func TestInventoryService_CreateItem_WhenPriceIsNegative_ThenShouldReturnError(t
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   categoryId,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -435,14 +396,11 @@ func TestInventoryService_CreateItem_WhenIdIsExisting_ThenShouldReturnError(t *t
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   categoryId,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	existing := &models.InventoryItem{
@@ -473,17 +431,14 @@ func TestInventoryService_CreateItem_WhenCategoryIdNotExist_ThenShouldReturnErro
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	i := &models.InventoryItem{
 		Name:       "Test Item",
-		CategoryId: categoryId,
+		CategoryId: uuid.NewV1(),
 		Origin:     models.ItemOriginLocal,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
-	i, err = is.CreateItem(context.Background(), i)
+	i, err := is.CreateItem(context.Background(), i)
 	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
 	assert.Nil(t, i)
 }
@@ -492,14 +447,11 @@ func TestInventoryService_UpdateItem_ThenShouldUpdate(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   categoryId,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -533,21 +485,15 @@ func TestInventoryService_UpdateItem_WhenItemNameIsEmpty_ThenShouldReturnError(t
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   categoryId,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
-	itemId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	i := &models.InventoryItem{
-		Id:         itemId,
+		Id:         uuid.NewV1(),
 		CategoryId: c.Id,
 		Origin:     models.ItemOriginLocal,
 		Price:      decimal.NewFromFloat32(10),
@@ -562,21 +508,15 @@ func TestInventoryService_UpdateItem_WhenPriceIsNegative_ThenShouldReturnError(t
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   categoryId,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
-	itemId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	i := &models.InventoryItem{
-		Id:         itemId,
+		Id:         uuid.NewV1(),
 		Name:       "Test Item",
 		CategoryId: c.Id,
 		Origin:     models.ItemOriginLocal,
@@ -592,17 +532,14 @@ func TestInventoryService_UpdateItem_WhenIdIsNil_ThenShouldReturnError(t *testin
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	i := &models.InventoryItem{
 		Name:       "Test Item",
-		CategoryId: categoryId,
+		CategoryId: uuid.NewV1(),
 		Origin:     models.ItemOriginLocal,
 		Price:      decimal.NewFromFloat32(10),
 	}
 
-	i, err = is.UpdateItem(context.Background(), i)
+	i, err := is.UpdateItem(context.Background(), i)
 	assert.Equal(t, err, inventory.ErrInvalidItemId, "expecting error")
 	assert.Nil(t, i)
 }
@@ -611,21 +548,15 @@ func TestInventoryService_UpdateItem_WhenItemIsNotExist_ThanShouldReturnError(t 
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
-	itemId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	i := &models.InventoryItem{
-		Id:         itemId,
+		Id:         uuid.NewV1(),
 		Name:       "Test Item - 1",
 		CategoryId: c.Id,
 		Origin:     models.ItemOriginLocal,
@@ -640,14 +571,11 @@ func TestInventoryService_UpdateItem_WhenNewCategoryIdNotExist_ThenShouldReturnE
 	is := newMockedService()
 	defer is.Close()
 
-	categoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   categoryId,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -660,10 +588,7 @@ func TestInventoryService_UpdateItem_WhenNewCategoryIdNotExist_ThenShouldReturnE
 	i, err = is.CreateItem(context.Background(), i)
 	assert.NoError(t, err, "failed to add item")
 
-	newCategoryId, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
-	i.CategoryId = newCategoryId
+	i.CategoryId = uuid.NewV1()
 
 	i, err = is.UpdateItem(context.Background(), i)
 	assert.Equal(t, err, inventory.ErrInvalidCategoryId, "expecting error")
@@ -674,14 +599,11 @@ func TestInventoryService_GetItemByID_ShouldReturnItem(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -711,14 +633,11 @@ func TestInventoryService_GetCategoryByName_ShouldReturnList(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -731,7 +650,7 @@ func TestInventoryService_GetCategoryByName_ShouldReturnList(t *testing.T) {
 	i, err = is.CreateItem(context.Background(), i)
 	assert.NoError(t, err, "failed to add item")
 
-	find, err := is.GetItemsByCategoryID(context.Background(), id)
+	find, err := is.GetItemsByCategoryID(context.Background(), c.Id)
 	assert.NoError(t, err, "failed to find category")
 	assert.Equal(t, 1, len(find))
 }
@@ -748,14 +667,11 @@ func TestInventoryService_FetchAllItems_ThanReturnItems(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
@@ -777,14 +693,11 @@ func TestInventoryService_DeleteItem_ThanShouldDeleteItem(t *testing.T) {
 	is := newMockedService()
 	defer is.Close()
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
-	c, err = is.CreateCategory(context.Background(), c)
+	c, err := is.CreateCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	i := &models.InventoryItem{
