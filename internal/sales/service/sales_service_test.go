@@ -539,3 +539,53 @@ func TestSalesService_GetReceiptByID_WhenIdIsNil_ThenShouldReturnErr(t *testing.
 	_, err := ts.GetReceiptByID(ctx, uuid.Nil)
 	assert.Equal(t, sales.ErrInvalidReceiptId, err)
 }
+
+
+func TestSalesService_FetchAllReceipts(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Test Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+	}
+
+	_, err := ts.ts.CreateTax(context.Background(), tax)
+
+	c := &models.Category{
+		Name: "Test Category",
+	}
+	c, err = ts.is.CreateCategory(ctx, c)
+	assert.NoError(t, err, "failed to add category")
+
+	item := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	item, err = ts.is.CreateItem(ctx, item)
+	assert.NoError(t, err, "failed to add item")
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.AddItem(ctx, bid, item.Id, 10)
+	assert.NoError(t, err)
+
+	basket, err := ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket.Items[item.Id])
+	assert.Equal(t, 10, basket.Items[item.Id].Count)
+
+	_, err = ts.CloseBasket(ctx, bid)
+
+	list, err := ts.FetchAllReceipts(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t,1, len(list))
+}

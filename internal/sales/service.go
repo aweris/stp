@@ -14,4 +14,5 @@ type SalesService interface {
 	CancelBasket(ctx context.Context, basketId uuid.UUID) (error)
 	CloseBasket(ctx context.Context, basketId uuid.UUID) (*models.Receipt, error)
 	GetReceiptByID(ctx context.Context, receiptId uuid.UUID) (*models.Receipt, error)
+	FetchAllReceipts(ctx context.Context) ([]*models.Receipt, error)
 }

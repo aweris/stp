@@ -236,3 +236,7 @@ func (ss *salesService) GetReceiptByID(ctx context.Context, receiptId uuid.UUID)
 
 	return ss.receiptRepo.GetReceiptByID(ctx, receiptId)
 }
+
+func (ss *salesService) FetchAllReceipts(ctx context.Context) ([]*models.Receipt, error) {
+	return ss.receiptRepo.FetchAllReceipts(ctx)
+}
