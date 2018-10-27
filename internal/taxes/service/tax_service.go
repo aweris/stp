@@ -78,3 +78,11 @@ func (ts *taxService) GetTaxByID(ctx context.Context, taxId uuid.UUID) (*models.
 func (ts *taxService) FetchAllTaxes(ctx context.Context) ([]*models.Tax, error) {
 	return ts.taxRepo.FetchAllTaxes(ctx)
 }
+
+func (ts *taxService) DeleteTax(ctx context.Context, taxId uuid.UUID) (*models.Tax, error) {
+	if taxId == uuid.Nil {
+		return nil, taxes.ErrInvalidTaxId
+	}
+
+	return ts.taxRepo.DeleteTax(ctx, taxId)
+}

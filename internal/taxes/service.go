@@ -11,4 +11,5 @@ type TaxService interface {
 	UpdateTax(ctx context.Context, tax *models.Tax) (*models.Tax, error)
 	GetTaxByID(ctx context.Context, taxId uuid.UUID) (*models.Tax, error)
 	FetchAllTaxes(ctx context.Context) ([]*models.Tax, error)
+	DeleteTax(ctx context.Context, taxId uuid.UUID) (*models.Tax, error)
 }

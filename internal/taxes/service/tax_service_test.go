@@ -338,3 +338,33 @@ func TestTaxService_FetchAllTaxes_ShouldReturnList(t *testing.T) {
 	assert.Equal(t, 1, len(list))
 
 }
+
+func TestTaxService_DeleteTax_WhenIdIsNil_ThenShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	_, err := ts.DeleteTax(context.Background(), uuid.Nil)
+	assert.Equal(t, err, taxes.ErrInvalidTaxId)
+}
+
+func TestTaxService_DeleteTax_ShouldDeleteTax(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Will be Updated",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
+		},
+	}
+	tax, err := ts.TaxService.CreateTax(context.Background(), tax)
+	assert.NoError(t, err)
+
+	deleted, err := ts.TaxService.DeleteTax(context.Background(), tax.Id)
+	assert.NoError(t, err)
+	assert.NotNil(t, deleted)
+}
