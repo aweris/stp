@@ -337,3 +337,46 @@ func TestBoltDBTaxRepository_FetchAllTaxes_WithNoItem_ThanShouldReturnEmptyItemL
 	assert.NoError(t, err, "failed to fetch taxes")
 	assert.Empty(t, list)
 }
+
+func TestBoltDBTaxRepository_DeleteTax_ThanShouldDeleteTaxAndReturnDeletedItem(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Test Sales Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
+		},
+	}
+
+	tax, err := r.SaveTax(context.Background(), tax)
+	assert.NoError(t, err, "failed to add tax")
+
+	deleted, err := r.DeleteTax(context.Background(), tax.Id)
+	assert.NoError(t, err, "failed to delete tax")
+	assert.NotNil(t, deleted)
+
+	db.BoltDB.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketTax))
+		v := tb.Get(tax.Id.Bytes())
+		assert.Nil(t, v)
+		return nil
+	})
+}
+
+func TestBoltDBTaxRepository_DeleteTax_WhenDeleteNonExistingId_ThanShouldNotReturnErr(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
+
+	deleted, err := r.DeleteTax(context.Background(), uuid.NewV1())
+	assert.NoError(t, err, "failed to delete tax")
+	assert.Nil(t, deleted)
+}

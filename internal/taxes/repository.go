@@ -11,4 +11,5 @@ type TaxRepository interface {
 	GetTaxByID(ctx context.Context, taxId uuid.UUID) (*models.Tax, error)
 	GetTaxesByItemOriginAndCategory(ctx context.Context, origin models.ItemOrigin, categoryId uuid.UUID) ([]*models.Tax, error)
 	FetchAllTaxes(ctx context.Context) ([]*models.Tax, error)
+	DeleteTax(ctx context.Context, taxId uuid.UUID) (*models.Tax, error)
 }

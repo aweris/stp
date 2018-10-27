@@ -125,3 +125,22 @@ func (tr *boltDBTaxRepository) FetchAllTaxes(ctx context.Context) ([]*models.Tax
 	})
 	return txs, err
 }
+
+func (tr *boltDBTaxRepository) DeleteTax(ctx context.Context, taxId uuid.UUID) (*models.Tax, error) {
+	var existing *models.Tax
+	err := tr.db.Update(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketTax))
+
+		v := tb.Get(taxId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &existing)
+		if err != nil {
+			return err
+		}
+
+		return tb.Delete(taxId.Bytes())
+	})
+	return existing, err
+}
