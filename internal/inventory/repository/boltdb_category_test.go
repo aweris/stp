@@ -6,7 +6,7 @@ import (
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/storage"
 	"github.com/satori/go.uuid"
-	bolt "go.etcd.io/bbolt"
+	"go.etcd.io/bbolt"
 	"strings"
 
 	"github.com/stretchr/testify/assert"
@@ -26,21 +26,18 @@ func TestBoltDBCategoryRepository_SaveCategory(t *testing.T) {
 
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
 
-	c, err = r.SaveCategory(context.Background(), c)
+	c, err := r.SaveCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	db.BoltDB.View(func(tx *bolt.Tx) error {
 		tb := tx.Bucket([]byte(bucketCategory))
 
-		v := tb.Get(id.Bytes())
+		v := tb.Get(c.Id.Bytes())
 
 		assert.NotNil(t, v)
 
@@ -50,7 +47,7 @@ func TestBoltDBCategoryRepository_SaveCategory(t *testing.T) {
 		idx := ib.Bucket([]byte(bucketCategoryIdxName))
 
 		idxv := idx.Get([]byte(strings.ToLower(c.Name)))
-		assert.Equal(t, id.Bytes(), idxv)
+		assert.Equal(t, c.Id.Bytes(), idxv)
 		return nil
 	})
 }
@@ -61,19 +58,15 @@ func TestBoltDBCategoryRepository_GetCategoryByID_ShouldReturnCategory(t *testin
 
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
-	id, err := uuid.NewV1()
-
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
 
-	c, err = r.SaveCategory(context.Background(), c)
+	c, err := r.SaveCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
-	find, err := r.GetCategoryByID(context.Background(), id)
+	find, err := r.GetCategoryByID(context.Background(), c.Id)
 
 	assert.NoError(t, err, "failed to find category")
 	assert.Equal(t, find, c, "invalid category")
@@ -85,11 +78,7 @@ func TestBoltDBCategoryRepository_GetCategoryByID_WithNonExisting_ShouldNotRetur
 
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
-	find, err := r.GetCategoryByID(context.Background(), id)
-
+	find, err := r.GetCategoryByID(context.Background(), uuid.NewV1())
 	assert.NoError(t, err, "failed to find category")
 	assert.Nil(t, find, "invalid category")
 }
@@ -100,16 +89,12 @@ func TestBoltDBCategoryRepository_GetCategoryByName_ShouldReturnCategory(t *test
 
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
-	id, err := uuid.NewV1()
-
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
 
-	c, err = r.SaveCategory(context.Background(), c)
+	c, err := r.SaveCategory(context.Background(), c)
 	assert.NoError(t, err, "failed to add category")
 
 	find, err := r.GetCategoryByName(context.Background(), "Test category")
@@ -136,22 +121,16 @@ func TestBoltDBCategoryRepository_FetchAllCategories_ShouldReturnCategoryList(t 
 
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
-	id1, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c1 := &models.Category{
-		Id:   id1,
+		Id:   uuid.NewV1(),
 		Name: "Test Category 1",
 	}
 
-	c1, err = r.SaveCategory(context.Background(), c1)
+	c1, err := r.SaveCategory(context.Background(), c1)
 	assert.NoError(t, err, "failed to add category")
 
-	id2, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
 	c2 := &models.Category{
-		Id:   id2,
+		Id:   uuid.NewV1(),
 		Name: "Test Category 2",
 	}
 
@@ -183,20 +162,16 @@ func TestBoltDBCategoryRepository_DeleteCategory_ShouldReturnCategory(t *testing
 
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
-	id, err := uuid.NewV1()
-
-	assert.NoError(t, err, "failed to generate id")
-
 	c := &models.Category{
-		Id:   id,
+		Id:   uuid.NewV1(),
 		Name: "Test Category",
 	}
 
-	c, err = r.SaveCategory(context.Background(), c)
+	c, err := r.SaveCategory(context.Background(), c)
 
 	assert.NoError(t, err, "failed to add category")
 
-	deleted, err := r.DeleteCategory(context.Background(), id)
+	deleted, err := r.DeleteCategory(context.Background(), c.Id)
 
 	assert.NoError(t, err, "failed to delete category")
 	assert.Equal(t, deleted, c, "invalid category deleted")
@@ -205,7 +180,7 @@ func TestBoltDBCategoryRepository_DeleteCategory_ShouldReturnCategory(t *testing
 	db.BoltDB.View(func(tx *bolt.Tx) error {
 		tb := tx.Bucket([]byte(bucketCategory))
 
-		v := tb.Get(id.Bytes())
+		v := tb.Get(c.Id.Bytes())
 
 		assert.Nil(t, v)
 
@@ -226,10 +201,7 @@ func TestBoltDBCategoryRepository_DeleteCategory_WithNonExisting_ShouldNotReturn
 
 	r := inventoryRepo.NewBoltDBCategoryRepository(db.BoltDB)
 
-	id, err := uuid.NewV1()
-	assert.NoError(t, err, "failed to generate id")
-
-	deleted, err := r.DeleteCategory(context.Background(), id)
+	deleted, err := r.DeleteCategory(context.Background(), uuid.NewV1())
 
 	assert.NoError(t, err, "failed to delete category")
 	assert.Nil(t, deleted, "should be nil since we'r deleting non existing category")

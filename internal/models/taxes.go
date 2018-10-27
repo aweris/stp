@@ -6,27 +6,46 @@ import (
 	"strings"
 )
 
+// TaxOrigin is defines tax scope according to inventory item origin
+type TaxOrigin string
+
+const (
+	TaxOriginAll    TaxOrigin = "ALL"
+	TaxOriginLocal  TaxOrigin = "LOCAL"
+	TaxOriginImport TaxOrigin = "IMPORT"
+)
+
+// TaxCondition is defines category given in tax subject or exempt from tax.
 type TaxCondition string
-type TaxType string
 
 const (
 	UnknownTC    TaxCondition = "UNKNOWN"
 	ExemptToTax  TaxCondition = "EXEMPT"  // refers to only tax types in context will be free from tax
 	SubjectToTax TaxCondition = "SUBJECT" // refers to only tax types in context will be effected from tax
-
-	UnknownTaxType TaxType = "UNKNOWN"
-	CategoryTax    TaxType = "CATEGORY" // refers to items will be filtered by category
-	OriginTax      TaxType = "ORIGIN"   // refers to items will be filtered by item origin
 )
 
 // Tax
 type Tax struct {
-	Id        uuid.UUID       `json:"id"`
-	Name      string          `json:"name"`
-	Rate      decimal.Decimal `json:"rate"`
-	Type      TaxType         `json:"type"`
-	Condition TaxCondition    `json:"condition"`
-	Context   []uuid.UUID     `json:"context"`
+	Id         uuid.UUID       `json:"id"`
+	Name       string          `json:"name"`
+	Rate       decimal.Decimal `json:"rate"`
+	Origin     TaxOrigin       `json:"origin"`
+	Condition  TaxCondition    `json:"condition"`
+	Categories []uuid.UUID     `json:"categories"`
+}
+
+func (tt *TaxOrigin) UnmarshalText(b []byte) error {
+	str := strings.Trim(string(b), `"`)
+
+	switch str {
+	case "LOCAL", "IMPORT", "ALL":
+		*tt = TaxOrigin(str)
+
+	default:
+		*tt = TaxOriginAll
+	}
+
+	return nil
 }
 
 func (tc *TaxCondition) UnmarshalText(b []byte) error {
@@ -38,20 +57,6 @@ func (tc *TaxCondition) UnmarshalText(b []byte) error {
 
 	default:
 		*tc = UnknownTC
-	}
-
-	return nil
-}
-
-func (tt *TaxType) UnmarshalText(b []byte) error {
-	str := strings.Trim(string(b), `"`)
-
-	switch str {
-	case "CATEGORY", "ORIGIN":
-		*tt = TaxType(str)
-
-	default:
-		*tt = UnknownTaxType
 	}
 
 	return nil

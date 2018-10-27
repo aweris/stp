@@ -27,22 +27,22 @@ func TestTaxCondition_UnmarshalText_WhenNotKnownOption_ThenShouldAssignUnknown(t
 	assert.Equal(t, tax.Condition, models.UnknownTC)
 }
 
-func TestTaxType_UnmarshalText(t *testing.T) {
-	str := "{\"type\":\"ORIGIN\"}"
+func TestTaxOrigin_UnmarshalText(t *testing.T) {
+	str := "{\"origin\":\"LOCAL\"}"
 
 	var tax models.Tax
 
 	json.Unmarshal([]byte(str), &tax)
 
-	assert.Equal(t, tax.Type, models.OriginTax)
+	assert.Equal(t, tax.Origin, models.TaxOriginLocal)
 }
 
 func TestTaxType_UnmarshalText_WhenNotKnownOption_ThenShouldAssignUnknown(t *testing.T) {
-	str := "{\"type\":\"NOT OPTION\"}"
+	str := "{\"origin\":\"NOT OPTION\"}"
 
 	var tax models.Tax
 
 	json.Unmarshal([]byte(str), &tax)
 
-	assert.Equal(t, tax.Type, models.UnknownTaxType)
+	assert.Equal(t, tax.Origin, models.TaxOriginAll)
 }
