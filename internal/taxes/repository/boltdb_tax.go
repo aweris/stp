@@ -104,3 +104,24 @@ func (tr *boltDBTaxRepository) GetTaxesByItemOriginAndCategory(ctx context.Conte
 	})
 	return txs, err
 }
+
+func (tr *boltDBTaxRepository) FetchAllTaxes(ctx context.Context) ([]*models.Tax, error) {
+	var txs = make([]*models.Tax, 0)
+	err := tr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketTax))
+
+		return tb.ForEach(func(k, v []byte) error {
+			if v == nil {
+				return nil
+			}
+			var tax models.Tax
+			err := json.Unmarshal(v, &tax)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, &tax)
+			return nil
+		})
+	})
+	return txs, err
+}

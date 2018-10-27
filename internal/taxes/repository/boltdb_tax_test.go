@@ -301,3 +301,39 @@ func TestBoltDBTaxRepository_GetTaxesByItemOriginAndCategory(t *testing.T) {
 	assert.NoError(t, err, "failed to get taxes")
 	assert.Equal(t, 1, len(l3))
 }
+
+func TestBoltDBTaxRepository_FetchAllTaxes_ThanShouldReturnItemList(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Test Sales Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
+		},
+	}
+
+	tax, err := r.SaveTax(context.Background(), tax)
+	assert.NoError(t, err, "failed to add tax")
+
+	list, err := r.FetchAllTaxes(context.Background())
+	assert.NoError(t, err, "failed to fetch taxes")
+	assert.Equal(t, 1, len(list))
+}
+
+func TestBoltDBTaxRepository_FetchAllTaxes_WithNoItem_ThanShouldReturnEmptyItemLis(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
+
+	list, err := r.FetchAllTaxes(context.Background())
+	assert.NoError(t, err, "failed to fetch taxes")
+	assert.Empty(t, list)
+}
