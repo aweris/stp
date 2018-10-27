@@ -74,3 +74,7 @@ func (ts *taxService) GetTaxByID(ctx context.Context, taxId uuid.UUID) (*models.
 
 	return ts.taxRepo.GetTaxByID(ctx, taxId)
 }
+
+func (ts *taxService) FetchAllTaxes(ctx context.Context) ([]*models.Tax, error) {
+	return ts.taxRepo.FetchAllTaxes(ctx)
+}
