@@ -39,6 +39,13 @@ type TaxScope struct {
 	Categories map[uuid.UUID]bool `json:"categories"`
 }
 
+type SaleItem struct {
+	InventoryItem
+
+	Taxes decimal.Decimal `json:"taxes"`
+	Gross decimal.Decimal `json:"gross"`
+}
+
 func (tt *TaxOrigin) UnmarshalText(b []byte) error {
 	str := strings.Trim(string(b), `"`)
 
