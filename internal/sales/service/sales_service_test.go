@@ -63,6 +63,35 @@ func TestSalesService_CreateBasket(t *testing.T) {
 	assert.NotEqual(t, uuid.Nil, bid)
 }
 
+func TestSalesService_GetBasketByID(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	bid, err := ts.CreateBasket(context.Background())
+	assert.NoError(t, err)
+	assert.NotEqual(t, uuid.Nil, bid)
+
+	basket, err := ts.GetBasketByID(context.Background(), bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket)
+}
+
+func TestSalesService_GetBasketByID_WhenBucketIdEmpty_ThenShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	_, err := ts.GetBasketByID(context.Background(), uuid.Nil)
+	assert.Equal(t, sales.ErrInvalidBasketId, err)
+}
+
+func TestSalesService_GetBasketById_WhenBucketIdNotExist_ThenShouldNotReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	_, err := ts.GetBasketByID(context.Background(), uuid.NewV1())
+	assert.NoError(t, err, "failed to add item")
+}
+
 func TestSalesService_AddItem_WhenBucketEmpty_ThenResultMustBeSuccess(t *testing.T) {
 	ts := newMockedService()
 	defer ts.Close()
@@ -450,4 +479,63 @@ func TestSalesService_CloseBasket_WhenBasketHasItems_ThanShouldCloseBasketWithRe
 	basket, err = ts.br.GetBasketByID(ctx, bid)
 	assert.NoError(t, err)
 	assert.Equal(t, string(models.BasketStateClosed), string(basket.State))
+}
+
+func TestSalesService_GetReceiptByID(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Test Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+	}
+
+	_, err := ts.ts.CreateTax(context.Background(), tax)
+
+	c := &models.Category{
+		Name: "Test Category",
+	}
+	c, err = ts.is.CreateCategory(ctx, c)
+	assert.NoError(t, err, "failed to add category")
+
+	item := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	item, err = ts.is.CreateItem(ctx, item)
+	assert.NoError(t, err, "failed to add item")
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.AddItem(ctx, bid, item.Id, 10)
+	assert.NoError(t, err)
+
+	basket, err := ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket.Items[item.Id])
+	assert.Equal(t, 10, basket.Items[item.Id].Count)
+
+	receipt, err := ts.CloseBasket(ctx, bid)
+
+	find, err := ts.GetReceiptByID(ctx, receipt.Id)
+	assert.NoError(t, err)
+	assert.NotNil(t, find)
+}
+
+func TestSalesService_GetReceiptByID_WhenIdIsNil_ThenShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	_, err := ts.GetReceiptByID(ctx, uuid.Nil)
+	assert.Equal(t, sales.ErrInvalidReceiptId, err)
 }

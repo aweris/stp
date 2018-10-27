@@ -9,4 +9,6 @@ var (
 	ErrInvalidItemCount = errors.New("invalid item count")
 	ErrBasketNotOpen    = errors.New("basket not open")
 	ErrNotItemInBasket  = errors.New("there is no item in basket")
+
+	ErrInvalidReceiptId  = errors.New("invalid receipt id")
 )

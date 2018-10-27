@@ -36,6 +36,14 @@ func (ss *salesService) CreateBasket(ctx context.Context) (uuid.UUID, error) {
 	return b.Id, nil
 }
 
+func (ss *salesService) GetBasketByID(ctx context.Context, basketId uuid.UUID) (*models.Basket, error) {
+	if basketId == uuid.Nil {
+		return nil, sales.ErrInvalidBasketId
+	}
+
+	return ss.basketRepo.GetBasketByID(ctx, basketId)
+}
+
 func (ss *salesService) AddItem(ctx context.Context, basketId uuid.UUID, itemId uuid.UUID, itemCount int) (error) {
 	if basketId == uuid.Nil {
 		return sales.ErrInvalidBasketId
@@ -203,7 +211,7 @@ func (ss *salesService) CloseBasket(ctx context.Context, basketId uuid.UUID) (*m
 	}
 
 	receipt := &models.Receipt{
-		Id:         uuid.UUID{},
+		Id:         uuid.NewV1(),
 		Items:      items,
 		TotalTax:   totalTax,
 		TotalPrice: totalPrice,
@@ -219,4 +227,12 @@ func (ss *salesService) CloseBasket(ctx context.Context, basketId uuid.UUID) (*m
 	_, err = ss.basketRepo.SaveBasket(ctx, basket)
 
 	return receipt, err
+}
+
+func (ss *salesService) GetReceiptByID(ctx context.Context, receiptId uuid.UUID) (*models.Receipt, error) {
+	if receiptId == uuid.Nil {
+		return nil, sales.ErrInvalidReceiptId
+	}
+
+	return ss.receiptRepo.GetReceiptByID(ctx, receiptId)
 }
