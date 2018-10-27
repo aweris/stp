@@ -7,17 +7,19 @@ import (
 	"github.com/aweris/stp/internal/sales"
 	"github.com/aweris/stp/internal/taxes"
 	"github.com/satori/go.uuid"
+	"github.com/shopspring/decimal"
 )
 
 type salesService struct {
-	basketRepo sales.BasketRepository
+	basketRepo  sales.BasketRepository
+	receiptRepo sales.ReceiptRepository
 
 	invService inventory.InventoryService
 	taxService taxes.TaxService
 }
 
-func NewSalesService(basketRepo sales.BasketRepository, invService inventory.InventoryService, taxService taxes.TaxService) sales.SalesService {
-	return &salesService{basketRepo: basketRepo, taxService: taxService, invService: invService}
+func NewSalesService(basketRepo sales.BasketRepository, receiptRepo sales.ReceiptRepository, invService inventory.InventoryService, taxService taxes.TaxService) sales.SalesService {
+	return &salesService{basketRepo: basketRepo, receiptRepo: receiptRepo, taxService: taxService, invService: invService}
 }
 
 func (ss *salesService) CreateBasket(ctx context.Context) (uuid.UUID, error) {
@@ -159,5 +161,60 @@ func (ss *salesService) CancelBasket(ctx context.Context, basketId uuid.UUID) (e
 	basket.State = models.BasketStateCancelled
 
 	_, err = ss.basketRepo.SaveBasket(ctx, basket)
+	return err
+}
+
+func (ss *salesService) CloseBasket(ctx context.Context, basketId uuid.UUID) (error) {
+	if basketId == uuid.Nil {
+		return sales.ErrInvalidBasketId
+	}
+	basket, err := ss.basketRepo.GetBasketByID(ctx, basketId)
+	if err != nil {
+		return err
+	}
+	if basket == nil {
+		return sales.ErrInvalidBasketId
+	}
+
+	if basket.State != models.BasketStateOpened {
+		return sales.ErrBasketNotOpen
+	}
+
+	if len(basket.Items) > 0 {
+		items := make([]*models.BasketItem, 0, len(basket.Items))
+
+		totalTax := decimal.Zero
+		totalPrice := decimal.Zero
+		totalGross := decimal.Zero
+
+		for _, v := range basket.Items {
+			items = append(items, v)
+			subTax := v.Taxes.Mul(decimal.NewFromFloat32(float32(v.Count)))
+			totalTax = totalTax.Add(subTax)
+
+			subPrice := v.Price.Mul(decimal.NewFromFloat32(float32(v.Count)))
+			totalPrice = totalPrice.Add(subPrice)
+
+			subGross := v.Gross.Mul(decimal.NewFromFloat32(float32(v.Count)))
+			totalGross = totalGross.Add(subGross)
+		}
+
+		receipt := &models.Receipt{
+			Id:         uuid.UUID{},
+			Items:      items,
+			TotalTax:   totalTax,
+			TotalPrice: totalPrice,
+			TotalGross: totalGross,
+		}
+
+		receipt, err = ss.receiptRepo.SaveReceipt(ctx, receipt)
+		if err != nil {
+			return err
+		}
+	}
+
+	basket.State = models.BasketStateClosed
+	_, err = ss.basketRepo.SaveBasket(ctx, basket)
+
 	return err
 }

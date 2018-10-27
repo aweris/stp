@@ -26,6 +26,8 @@ type mockedService struct {
 	db *storage.TestDB
 
 	br sales.BasketRepository
+	rr sales.ReceiptRepository
+
 	is inventory.InventoryService
 	ts taxes.TaxService
 }
@@ -41,10 +43,11 @@ func newMockedService() *mockedService {
 	ts := taxService.NewTaxService(tr)
 
 	br := salesRepository.NewBoltDBBasketRepository(db.BoltDB)
+	rr := salesRepository.NewBoltDBReceiptRepository(db.BoltDB)
 
-	ss := salesService.NewSalesService(br, is, ts)
+	ss := salesService.NewSalesService(br, rr, is, ts)
 
-	return &mockedService{db: db, SalesService: ss, br: br, is: is, ts: ts}
+	return &mockedService{db: db, SalesService: ss, br: br, rr: rr, is: is, ts: ts}
 }
 
 func (ms *mockedService) Close() {
@@ -378,4 +381,55 @@ func TestSalesService_CancelBasket(t *testing.T) {
 
 	err = ts.CancelBasket(ctx, bid)
 	assert.NoError(t, err)
+}
+
+func TestSalesService_CloseBasket_WhenBasketHasItems_ThanShouldCloseBasketWithReceipt(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Test Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+	}
+
+	_, err := ts.ts.CreateTax(context.Background(), tax)
+
+	c := &models.Category{
+		Name: "Test Category",
+	}
+	c, err = ts.is.CreateCategory(ctx, c)
+	assert.NoError(t, err, "failed to add category")
+
+	item := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	item, err = ts.is.CreateItem(ctx, item)
+	assert.NoError(t, err, "failed to add item")
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.AddItem(ctx, bid, item.Id, 10)
+	assert.NoError(t, err)
+
+	basket, err := ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket.Items[item.Id])
+	assert.Equal(t, 10, basket.Items[item.Id].Count)
+
+	err = ts.CloseBasket(ctx, bid)
+
+	assert.NoError(t, err)
+
+	basket, err = ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.Equal(t, string(models.BasketStateClosed), string(basket.State))
 }

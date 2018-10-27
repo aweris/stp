@@ -31,7 +31,7 @@ type TaxDTO struct {
 
 func fromTaxToDTO(tax *models.Tax) *TaxDTO {
 
-	categories := make([]uuid.UUID, 0, len(tax.Condition))
+	categories := make([]uuid.UUID, 0, len(tax.Categories))
 	for k := range tax.Categories {
 		categories = append(categories, k)
 	}
