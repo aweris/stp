@@ -20,6 +20,7 @@ func NewHandler(s *server.Server) *ApiHandler {
 	// initialize routes
 	api.registerHealthCheck()
 	api.registerInventoryRoutes()
+	api.registerTaxRoutes()
 
 	return api
 }

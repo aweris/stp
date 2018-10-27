@@ -26,15 +26,10 @@ const (
 
 // Tax
 type Tax struct {
-	Id     uuid.UUID       `json:"id"`
-	Name   string          `json:"name"`
-	Rate   decimal.Decimal `json:"rate"`
-	Origin TaxOrigin       `json:"origin"`
-
-	TaxScope
-}
-
-type TaxScope struct {
+	Id         uuid.UUID          `json:"id"`
+	Name       string             `json:"name"`
+	Rate       decimal.Decimal    `json:"rate"`
+	Origin     TaxOrigin          `json:"origin"`
 	Condition  TaxCondition       `json:"condition"`
 	Categories map[uuid.UUID]bool `json:"categories"`
 }

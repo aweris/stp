@@ -23,14 +23,12 @@ func TestBoltDBTaxRepository_SaveTax(t *testing.T) {
 	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.ExemptToTax,
-			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.ExemptToTax,
+		Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
@@ -63,14 +61,12 @@ func TestBoltDBTaxRepository_GetTaxByID_ThanShouldReturnItem(t *testing.T) {
 	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.ExemptToTax,
-			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.ExemptToTax,
+		Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
@@ -90,14 +86,12 @@ func TestBoltDBTaxRepository_GetTaxesByItemOriginAndCategory_WhenItemExemptToTax
 	categoryId := uuid.NewV1()
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.ExemptToTax,
-			Categories: map[uuid.UUID]bool{categoryId: true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.ExemptToTax,
+		Categories: map[uuid.UUID]bool{categoryId: true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
@@ -115,14 +109,12 @@ func TestBoltDBTaxRepository_GetTaxesByItemOriginAndCategory_WhenItemNotInExempt
 	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.ExemptToTax,
-			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.ExemptToTax,
+		Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
@@ -142,14 +134,12 @@ func TestBoltDBTaxRepository_GetTaxesByItemOriginAndCategory_WhenItemSubjectToTa
 	categoryId := uuid.NewV1()
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.SubjectToTax,
-			Categories: map[uuid.UUID]bool{categoryId: true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.SubjectToTax,
+		Categories: map[uuid.UUID]bool{categoryId: true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
@@ -167,14 +157,12 @@ func TestBoltDBTaxRepository_GetTaxesByItemOriginAndCategory_WhenItemNotInSubjec
 	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.SubjectToTax,
-			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.SubjectToTax,
+		Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
@@ -262,28 +250,24 @@ func TestBoltDBTaxRepository_GetTaxesByItemOriginAndCategory(t *testing.T) {
 	c3 := uuid.NewV1()
 
 	subjectOnlyOne := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.SubjectToTax,
-			Categories: map[uuid.UUID]bool{c1: true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.SubjectToTax,
+		Categories: map[uuid.UUID]bool{c1: true},
 	}
 
 	subjectOnlyOne, err = r.SaveTax(context.Background(), subjectOnlyOne)
 	assert.NoError(t, err, "failed to add tax")
 
 	exemptOnlyOne := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.ExemptToTax,
-			Categories: map[uuid.UUID]bool{c3: true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.ExemptToTax,
+		Categories: map[uuid.UUID]bool{c3: true},
 	}
 
 	exemptOnlyOne, err = r.SaveTax(context.Background(), exemptOnlyOne)
@@ -309,14 +293,12 @@ func TestBoltDBTaxRepository_FetchAllTaxes_ThanShouldReturnItemList(t *testing.T
 	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.ExemptToTax,
-			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.ExemptToTax,
+		Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
@@ -345,14 +327,12 @@ func TestBoltDBTaxRepository_DeleteTax_ThanShouldDeleteTaxAndReturnDeletedItem(t
 	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
 
 	tax := &models.Tax{
-		Id:     uuid.NewV1(),
-		Name:   "Test Sales Tax",
-		Rate:   decimal.NewFromFloat32(10),
-		Origin: models.TaxOriginAll,
-		TaxScope: models.TaxScope{
-			Condition:  models.ExemptToTax,
-			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
-		},
+		Id:         uuid.NewV1(),
+		Name:       "Test Sales Tax",
+		Rate:       decimal.NewFromFloat32(10),
+		Origin:     models.TaxOriginAll,
+		Condition:  models.ExemptToTax,
+		Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
 	}
 
 	tax, err := r.SaveTax(context.Background(), tax)
