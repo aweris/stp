@@ -6,6 +6,7 @@ import (
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/internal/sales"
 	"github.com/aweris/stp/storage"
+	"github.com/satori/go.uuid"
 	"go.etcd.io/bbolt"
 	"log"
 )
@@ -50,4 +51,22 @@ func (br *boltDBBasketRepository) SaveBasket(ctx context.Context, basket *models
 		return tb.Put(basket.Id.Bytes(), data)
 	})
 	return basket, err
+}
+
+func (br *boltDBBasketRepository) GetBasketByID(ctx context.Context, basketId uuid.UUID) (*models.Basket, error) {
+	var b *models.Basket
+	err := br.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketBasket))
+
+		v := tb.Get(basketId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &b)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return b, err
 }

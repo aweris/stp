@@ -37,3 +37,35 @@ func TestBoltDBBasketRepository_SaveBasket(t *testing.T) {
 		return nil
 	})
 }
+
+func TestBoltDBBasketRepository_GetBasketByID_WhenIdNotExistInDB_ThanShouldNotReturnError(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := basketRepository.NewBoltDBBasketRepository(db.BoltDB)
+
+	find, err := r.GetBasketByID(context.Background(), uuid.NewV1())
+
+	assert.NoError(t, err)
+	assert.Nil(t, find)
+}
+
+func TestBoltDBBasketRepository_GetBasketByID_WhenIDExistInDB_ThanShouldReturnBasket(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := basketRepository.NewBoltDBBasketRepository(db.BoltDB)
+
+	b := &models.Basket{
+		Id:    uuid.NewV1(),
+		State: models.BasketStateOpened,
+	}
+
+	b, err := r.SaveBasket(context.Background(), b)
+	assert.NoError(t, err)
+
+	find, err := r.GetBasketByID(context.Background(), b.Id)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, find)
+}
