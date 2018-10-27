@@ -12,7 +12,6 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
-
 	salesRepository "github.com/aweris/stp/internal/sales/repository"
 	salesService "github.com/aweris/stp/internal/sales/service"
 	taxRepository "github.com/aweris/stp/internal/taxes/repository"
