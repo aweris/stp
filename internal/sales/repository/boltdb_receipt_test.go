@@ -104,3 +104,40 @@ func TestBoltDBReceiptRepository_GetReceiptByID_WhenIdNotExistInDB_ThenShouldNot
 	assert.NoError(t, err)
 	assert.Nil(t, find)
 }
+
+func TestBoltDBReceiptRepository_FetchAllReceipts(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := salesRepository.NewBoltDBReceiptRepository(db.BoltDB)
+
+	re := &models.Receipt{
+		Id: uuid.NewV1(),
+		Items: []*models.BasketItem{
+			{
+				SaleItem: &models.SaleItem{
+					InventoryItem: &models.InventoryItem{
+						Id:         uuid.UUID{},
+						Name:       "Tester",
+						CategoryId: uuid.UUID{},
+						Origin:     models.ItemOriginImported,
+						Price:      decimal.NewFromFloat32(10),
+					},
+					Taxes: decimal.NewFromFloat32(1),
+					Gross: decimal.NewFromFloat32(11),
+				},
+				Count: 1,
+			},
+		},
+		TotalTax:   decimal.NewFromFloat32(1),
+		TotalPrice: decimal.NewFromFloat32(10),
+		TotalGross: decimal.NewFromFloat32(11),
+	}
+
+	re, err := r.SaveReceipt(context.Background(), re)
+	assert.NoError(t, err)
+
+	list, err := r.FetchAllReceipts(context.Background())
+	assert.NoError(t, err)
+	assert.NotNil(t, 1, len(list))
+}

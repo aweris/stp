@@ -70,3 +70,24 @@ func (rr *boltDBReceiptRepository) GetReceiptByID(ctx context.Context, receiptId
 	})
 	return r, err
 }
+
+func (rr *boltDBReceiptRepository) FetchAllReceipts(ctx context.Context) ([]*models.Receipt, error) {
+	var rs = make([]*models.Receipt, 0)
+	err := rr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketReceipt))
+
+		return tb.ForEach(func(k, v []byte) error {
+			if v == nil {
+				return nil
+			}
+			var r models.Receipt
+			err := json.Unmarshal(v, &r)
+			if err != nil {
+				return err
+			}
+			rs = append(rs, &r)
+			return nil
+		})
+	})
+	return rs, err
+}
