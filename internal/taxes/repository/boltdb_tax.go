@@ -6,6 +6,7 @@ import (
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/internal/taxes"
 	"github.com/aweris/stp/storage"
+	"github.com/satori/go.uuid"
 	"go.etcd.io/bbolt"
 	"log"
 )
@@ -94,6 +95,24 @@ func (btr *boltDBTaxRepository) SaveTax(ctx context.Context, tax *models.Tax) (*
 		}
 
 		return tb.Put(tax.Id.Bytes(), data)
+	})
+	return tax, err
+}
+
+func (tr *boltDBTaxRepository) GetTaxByID(ctx context.Context, taxId uuid.UUID) (*models.Tax, error) {
+	var tax *models.Tax
+	err := tr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketTax))
+
+		v := tb.Get(taxId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &tax)
+		if err != nil {
+			return err
+		}
+		return nil
 	})
 	return tax, err
 }

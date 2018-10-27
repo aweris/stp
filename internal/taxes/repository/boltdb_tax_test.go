@@ -61,3 +61,40 @@ func TestBoltDBTaxRepository_SaveTax(t *testing.T) {
 		return nil
 	})
 }
+
+func TestBoltDBTaxRepository_GetTaxByID_WithNonExisting_ThanShouldNotReturnError(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
+
+	find, err := r.GetTaxByID(context.Background(), uuid.NewV1())
+
+	assert.NoError(t, err, "failed to tax")
+	assert.Nil(t, find, "invalid tax")
+}
+
+func TestBoltDBTaxRepository_GetTaxByID_ThanShouldReturnItem(t *testing.T) {
+	db := storage.NewTestDB()
+	defer db.Close()
+
+	r := taxRepository.NewBoltDBTaxRepository(db.BoltDB)
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Test Sales Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: []uuid.UUID{uuid.NewV1()},
+		},
+	}
+
+	tax, err := r.SaveTax(context.Background(), tax)
+	assert.NoError(t, err, "failed to add tax")
+
+	find, err := r.GetTaxByID(context.Background(), tax.Id)
+	assert.NoError(t, err, "failed to find tax")
+	assert.NotNil(t, find, "missing tax")
+}
