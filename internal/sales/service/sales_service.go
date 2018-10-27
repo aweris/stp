@@ -63,6 +63,10 @@ func (ss *salesService) AddItem(ctx context.Context, basketId uuid.UUID, itemId 
 		return sales.ErrInvalidBasketId
 	}
 
+	if basket.State != models.BasketStateOpened {
+		return sales.ErrBasketNotOpen
+	}
+
 	bi := basket.Items[si.Id]
 
 	if bi != nil {
@@ -107,6 +111,10 @@ func (ss *salesService) RemoveItem(ctx context.Context, basketId uuid.UUID, item
 	}
 	if basket == nil {
 		return sales.ErrInvalidBasketId
+	}
+
+	if basket.State != models.BasketStateOpened {
+		return sales.ErrBasketNotOpen
 	}
 
 	bi := basket.Items[si.Id]
