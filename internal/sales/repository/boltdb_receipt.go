@@ -6,6 +6,7 @@ import (
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/internal/sales"
 	"github.com/aweris/stp/storage"
+	"github.com/satori/go.uuid"
 	"go.etcd.io/bbolt"
 	"log"
 )
@@ -52,3 +53,20 @@ func (rr *boltDBReceiptRepository) SaveReceipt(ctx context.Context, receipt *mod
 	return receipt, err
 }
 
+func (rr *boltDBReceiptRepository) GetReceiptByID(ctx context.Context, receiptId uuid.UUID) (*models.Receipt, error) {
+	var r *models.Receipt
+	err := rr.db.View(func(tx *bolt.Tx) error {
+		tb := tx.Bucket([]byte(bucketReceipt))
+
+		v := tb.Get(receiptId.Bytes())
+		if v == nil {
+			return nil
+		}
+		err := json.Unmarshal(v, &r)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return r, err
+}

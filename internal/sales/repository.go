@@ -14,4 +14,5 @@ type BasketRepository interface {
 
 type ReceiptRepository interface {
 	SaveReceipt(ctx context.Context, receipt *models.Receipt) (*models.Receipt, error)
+	GetReceiptByID(ctx context.Context, receiptId uuid.UUID) (*models.Receipt, error)
 }
