@@ -383,6 +383,20 @@ func TestSalesService_CancelBasket(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestSalesService_CloseBasket_WhenBasketEmpty_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	_, err = ts.CloseBasket(ctx, bid)
+
+	assert.Equal(t, sales.ErrNotItemInBasket, err)
+}
+
 func TestSalesService_CloseBasket_WhenBasketHasItems_ThanShouldCloseBasketWithReceipt(t *testing.T) {
 	ts := newMockedService()
 	defer ts.Close()
@@ -425,9 +439,13 @@ func TestSalesService_CloseBasket_WhenBasketHasItems_ThanShouldCloseBasketWithRe
 	assert.NotNil(t, basket.Items[item.Id])
 	assert.Equal(t, 10, basket.Items[item.Id].Count)
 
-	err = ts.CloseBasket(ctx, bid)
+	receipt, err := ts.CloseBasket(ctx, bid)
 
 	assert.NoError(t, err)
+	assert.NotNil(t, receipt)
+	assert.True(t, receipt.TotalGross.Equal(decimal.NewFromFloat32(110)))
+	assert.True(t, receipt.TotalPrice.Equal(decimal.NewFromFloat32(100)))
+	assert.True(t, receipt.TotalTax.Equal(decimal.NewFromFloat32(10)))
 
 	basket, err = ts.br.GetBasketByID(ctx, bid)
 	assert.NoError(t, err)

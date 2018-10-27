@@ -164,57 +164,59 @@ func (ss *salesService) CancelBasket(ctx context.Context, basketId uuid.UUID) (e
 	return err
 }
 
-func (ss *salesService) CloseBasket(ctx context.Context, basketId uuid.UUID) (error) {
+func (ss *salesService) CloseBasket(ctx context.Context, basketId uuid.UUID) (*models.Receipt, error) {
 	if basketId == uuid.Nil {
-		return sales.ErrInvalidBasketId
+		return nil, sales.ErrInvalidBasketId
 	}
 	basket, err := ss.basketRepo.GetBasketByID(ctx, basketId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if basket == nil {
-		return sales.ErrInvalidBasketId
+		return nil, sales.ErrInvalidBasketId
 	}
 
 	if basket.State != models.BasketStateOpened {
-		return sales.ErrBasketNotOpen
+		return nil, sales.ErrBasketNotOpen
 	}
 
-	if len(basket.Items) > 0 {
-		items := make([]*models.BasketItem, 0, len(basket.Items))
+	if len(basket.Items) == 0 {
+		return nil, sales.ErrNotItemInBasket
+	}
 
-		totalTax := decimal.Zero
-		totalPrice := decimal.Zero
-		totalGross := decimal.Zero
+	items := make([]*models.BasketItem, 0, len(basket.Items))
 
-		for _, v := range basket.Items {
-			items = append(items, v)
-			subTax := v.Taxes.Mul(decimal.NewFromFloat32(float32(v.Count)))
-			totalTax = totalTax.Add(subTax)
+	totalTax := decimal.Zero
+	totalPrice := decimal.Zero
+	totalGross := decimal.Zero
 
-			subPrice := v.Price.Mul(decimal.NewFromFloat32(float32(v.Count)))
-			totalPrice = totalPrice.Add(subPrice)
+	for _, v := range basket.Items {
+		items = append(items, v)
+		subTax := v.Taxes.Mul(decimal.NewFromFloat32(float32(v.Count)))
+		totalTax = totalTax.Add(subTax)
 
-			subGross := v.Gross.Mul(decimal.NewFromFloat32(float32(v.Count)))
-			totalGross = totalGross.Add(subGross)
-		}
+		subPrice := v.Price.Mul(decimal.NewFromFloat32(float32(v.Count)))
+		totalPrice = totalPrice.Add(subPrice)
 
-		receipt := &models.Receipt{
-			Id:         uuid.UUID{},
-			Items:      items,
-			TotalTax:   totalTax,
-			TotalPrice: totalPrice,
-			TotalGross: totalGross,
-		}
+		subGross := v.Gross.Mul(decimal.NewFromFloat32(float32(v.Count)))
+		totalGross = totalGross.Add(subGross)
+	}
 
-		receipt, err = ss.receiptRepo.SaveReceipt(ctx, receipt)
-		if err != nil {
-			return err
-		}
+	receipt := &models.Receipt{
+		Id:         uuid.UUID{},
+		Items:      items,
+		TotalTax:   totalTax,
+		TotalPrice: totalPrice,
+		TotalGross: totalGross,
+	}
+
+	receipt, err = ss.receiptRepo.SaveReceipt(ctx, receipt)
+	if err != nil {
+		return nil, err
 	}
 
 	basket.State = models.BasketStateClosed
 	_, err = ss.basketRepo.SaveBasket(ctx, basket)
 
-	return err
+	return receipt, err
 }
