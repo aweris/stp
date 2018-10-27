@@ -26,12 +26,17 @@ const (
 
 // Tax
 type Tax struct {
-	Id         uuid.UUID       `json:"id"`
-	Name       string          `json:"name"`
-	Rate       decimal.Decimal `json:"rate"`
-	Origin     TaxOrigin       `json:"origin"`
-	Condition  TaxCondition    `json:"condition"`
-	Categories []uuid.UUID     `json:"categories"`
+	Id     uuid.UUID       `json:"id"`
+	Name   string          `json:"name"`
+	Rate   decimal.Decimal `json:"rate"`
+	Origin TaxOrigin       `json:"origin"`
+
+	TaxScope
+}
+
+type TaxScope struct {
+	Condition  TaxCondition `json:"condition"`
+	Categories []uuid.UUID  `json:"categories"`
 }
 
 func (tt *TaxOrigin) UnmarshalText(b []byte) error {

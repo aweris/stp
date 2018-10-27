@@ -6,12 +6,15 @@ import (
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/internal/taxes"
 	"github.com/aweris/stp/storage"
-	bolt "go.etcd.io/bbolt"
+	"go.etcd.io/bbolt"
 	"log"
 )
 
 const (
-	bucketTax = "taxes_tax"
+	bucketTax            = "taxes_tax"
+	bucketTaxMeta        = "_meta"
+	bucketTaxIdx         = "index"
+	bucketTaxIdxCategory = "idx_category"
 )
 
 type boltDBTaxRepository struct {
@@ -20,10 +23,25 @@ type boltDBTaxRepository struct {
 
 func (tr *boltDBTaxRepository) init() error {
 	return tr.db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucketTax))
+		tb, err := tx.CreateBucketIfNotExists([]byte(bucketTax))
 		if err != nil {
 			return err
 		}
+		mt, err := tb.CreateBucketIfNotExists([]byte(bucketTaxMeta))
+		if err != nil {
+			return err
+		}
+
+		ib, err := mt.CreateBucketIfNotExists([]byte(bucketTaxIdx))
+		if err != nil {
+			return err
+		}
+
+		_, err = ib.CreateBucketIfNotExists([]byte(bucketTaxIdxCategory))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 }
@@ -46,6 +64,35 @@ func (btr *boltDBTaxRepository) SaveTax(ctx context.Context, tax *models.Tax) (*
 		if err != nil {
 			return err
 		}
+
+		// avoid unnecessary bucket access
+		if len(tax.Categories) > 0 {
+			mb := tb.Bucket([]byte(bucketTaxMeta))
+			ib := mb.Bucket([]byte(bucketTaxIdx))
+			idx := ib.Bucket([]byte(bucketTaxIdxCategory))
+
+			idxIC := idx.Bucket(tax.Id.Bytes())
+
+			//Just workaround update all indexes since performance isn't problem in our case
+			if idxIC != nil {
+				idx.DeleteBucket(tax.Id.Bytes())
+			}
+
+			// creating index bucket for category
+			idxIC, err = idx.CreateBucket(tax.Id.Bytes())
+			if err != nil {
+				return err
+			}
+
+			// Adding categories to index
+			for _, k := range tax.Categories {
+				err = idxIC.Put(k.Bytes(), []byte("true"))
+				if err != nil {
+					return err
+				}
+			}
+		}
+
 		return tb.Put(tax.Id.Bytes(), data)
 	})
 	return tax, err
