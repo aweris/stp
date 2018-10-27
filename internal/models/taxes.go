@@ -40,7 +40,7 @@ type TaxScope struct {
 }
 
 type SaleItem struct {
-	InventoryItem
+	*InventoryItem
 
 	Taxes decimal.Decimal `json:"taxes"`
 	Gross decimal.Decimal `json:"gross"`

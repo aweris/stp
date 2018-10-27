@@ -368,3 +368,115 @@ func TestTaxService_DeleteTax_ShouldDeleteTax(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, deleted)
 }
+
+func TestTaxService_GetSaleItem_ShouldReturnSaleItem(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	tax := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Sale Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
+		},
+	}
+
+	tax, err := ts.TaxService.CreateTax(context.Background(), tax)
+	assert.NoError(t, err)
+
+	i := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: uuid.NewV1(),
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(14.99),
+	}
+
+	si, err := ts.TaxService.GetSaleItem(context.Background(), i)
+	assert.NoError(t, err)
+	assert.True(t, si.Gross.Equal(decimal.NewFromFloat32(16.49)))
+}
+
+func TestTaxService_GetSaleItem_WhenHaveMultipleTax_ThenShouldReturnSaleItem(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	bst := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Sale Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: map[uuid.UUID]bool{uuid.NewV1(): true},
+		},
+	}
+
+	_, err := ts.TaxService.CreateTax(context.Background(), bst)
+	assert.NoError(t, err)
+
+	it := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Import Tax",
+		Rate:   decimal.NewFromFloat32(5),
+		Origin: models.TaxOriginImport,
+	}
+
+	_, err = ts.TaxService.CreateTax(context.Background(), it)
+	assert.NoError(t, err)
+
+	i := &models.InventoryItem{
+		Name:       "Perfume",
+		CategoryId: uuid.NewV1(),
+		Origin:     models.ItemOriginImported,
+		Price:      decimal.NewFromFloat32(47.50),
+	}
+
+	si, err := ts.TaxService.GetSaleItem(context.Background(), i)
+	assert.NoError(t, err)
+	assert.True(t, si.Gross.Equal(decimal.NewFromFloat32(54.65)))
+}
+
+func TestTaxService_GetSaleItem_WhenHaveMultipleTaxesButOnlyOneOkay_ThanShouldApplyOnlyOneForSaleItem(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	exemptId := uuid.NewV1()
+
+	bst := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Sale Tax",
+		Rate:   decimal.NewFromFloat32(10),
+		Origin: models.TaxOriginAll,
+		TaxScope: models.TaxScope{
+			Condition:  models.ExemptToTax,
+			Categories: map[uuid.UUID]bool{exemptId: true},
+		},
+	}
+
+	_, err := ts.TaxService.CreateTax(context.Background(), bst)
+	assert.NoError(t, err)
+
+	it := &models.Tax{
+		Id:     uuid.NewV1(),
+		Name:   "Import Tax",
+		Rate:   decimal.NewFromFloat32(5),
+		Origin: models.TaxOriginImport,
+	}
+
+	_, err = ts.TaxService.CreateTax(context.Background(), it)
+	assert.NoError(t, err)
+
+	i := &models.InventoryItem{
+		Name:       "Perfume",
+		CategoryId: exemptId,
+		Origin:     models.ItemOriginImported,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	si, err := ts.TaxService.GetSaleItem(context.Background(), i)
+	assert.NoError(t, err)
+	assert.True(t, si.Gross.Equal(decimal.NewFromFloat32(10.5)))
+}

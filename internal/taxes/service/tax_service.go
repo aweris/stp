@@ -5,6 +5,7 @@ import (
 	"github.com/aweris/stp/internal/models"
 	"github.com/aweris/stp/internal/taxes"
 	"github.com/satori/go.uuid"
+	"github.com/shopspring/decimal"
 )
 
 type taxService struct {
@@ -85,4 +86,27 @@ func (ts *taxService) DeleteTax(ctx context.Context, taxId uuid.UUID) (*models.T
 	}
 
 	return ts.taxRepo.DeleteTax(ctx, taxId)
+}
+
+func (ts *taxService) GetSaleItem(ctx context.Context, item *models.InventoryItem) (*models.SaleItem, error) {
+	if item == nil {
+		return nil, taxes.ErrInvalidParameter
+	}
+
+	taxes, err := ts.taxRepo.GetTaxesByItemOriginAndCategory(ctx, item.Origin, item.CategoryId)
+	if err != nil {
+		return nil, err
+	}
+
+	rate := decimal.Zero
+
+	for _, tax := range taxes {
+		rate = rate.Add(tax.Rate)
+	}
+
+	rate = rate.Div(decimal.NewFromFloat32(100))
+
+	taxAmount := item.Price.Mul(rate).RoundCash(5)
+
+	return &models.SaleItem{InventoryItem: item, Taxes: taxAmount, Gross: taxAmount.Add(item.Price)}, nil
 }
