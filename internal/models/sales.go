@@ -1,6 +1,9 @@
 package models
 
-import "github.com/satori/go.uuid"
+import (
+	"github.com/satori/go.uuid"
+	"github.com/shopspring/decimal"
+)
 
 type BasketState string
 
@@ -21,4 +24,15 @@ type BasketItem struct {
 	*SaleItem
 
 	Count int `json:"count"`
+}
+
+// Receipt represents written acknowledgment that something of value has been received.
+type Receipt struct {
+	Id uuid.UUID `json:"id"`
+
+	basketID   uuid.UUID
+	Items      []*BasketItem   `json:"items"`
+	TotalTax   decimal.Decimal `json:"total_tax"`
+	TotalPrice decimal.Decimal `json:"total_price"`
+	TotalGross decimal.Decimal `json:"total_gross"`
 }
