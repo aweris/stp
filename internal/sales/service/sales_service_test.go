@@ -170,3 +170,163 @@ func TestSalesService_AddItem_WhenBasketIdNotExist_ThanShouldReturnErr(t *testin
 	err := ts.AddItem(ctx, uuid.NewV1(), uuid.NewV1(), 2)
 	assert.Equal(t, sales.ErrInvalidBasketId, err)
 }
+
+func TestSalesService_RemoveItem_WhenItemCountBiggerThanRemove_ThanShouldRemoveItemsChangeItemCount(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	c := &models.Category{
+		Name: "Test Category",
+	}
+	c, err := ts.is.CreateCategory(ctx, c)
+	assert.NoError(t, err, "failed to add category")
+
+	item := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	item, err = ts.is.CreateItem(ctx, item)
+	assert.NoError(t, err, "failed to add item")
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.AddItem(ctx, bid, item.Id, 10)
+	assert.NoError(t, err)
+
+	basket, err := ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket.Items[item.Id])
+	assert.Equal(t, 10, basket.Items[item.Id].Count)
+
+	err = ts.RemoveItem(ctx, bid, item.Id, 8)
+	assert.NoError(t, err)
+
+	basket, err = ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket.Items[item.Id])
+	assert.Equal(t, 2, basket.Items[item.Id].Count)
+}
+
+func TestSalesService_RemoveItem_WhenItemCountEqual_ThanShouldRemoveItemFromList(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	c := &models.Category{
+		Name: "Test Category",
+	}
+	c, err := ts.is.CreateCategory(ctx, c)
+	assert.NoError(t, err, "failed to add category")
+
+	item := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	item, err = ts.is.CreateItem(ctx, item)
+	assert.NoError(t, err, "failed to add item")
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.AddItem(ctx, bid, item.Id, 10)
+	assert.NoError(t, err)
+
+	basket, err := ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket.Items[item.Id])
+	assert.Equal(t, 10, basket.Items[item.Id].Count)
+
+	err = ts.RemoveItem(ctx, bid, item.Id, 10)
+	assert.NoError(t, err)
+
+	basket, err = ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.Nil(t, basket.Items[item.Id])
+}
+
+func TestSalesService_RemoveItem_WhenItemCountBigger_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	c := &models.Category{
+		Name: "Test Category",
+	}
+	c, err := ts.is.CreateCategory(ctx, c)
+	assert.NoError(t, err, "failed to add category")
+
+	item := &models.InventoryItem{
+		Name:       "Test Item",
+		CategoryId: c.Id,
+		Origin:     models.ItemOriginLocal,
+		Price:      decimal.NewFromFloat32(10),
+	}
+
+	item, err = ts.is.CreateItem(ctx, item)
+	assert.NoError(t, err, "failed to add item")
+
+	bid, err := ts.CreateBasket(ctx)
+	assert.NoError(t, err)
+
+	err = ts.AddItem(ctx, bid, item.Id, 10)
+	assert.NoError(t, err)
+
+	basket, err := ts.br.GetBasketByID(ctx, bid)
+	assert.NoError(t, err)
+	assert.NotNil(t, basket.Items[item.Id])
+	assert.Equal(t, 10, basket.Items[item.Id].Count)
+
+	err = ts.RemoveItem(ctx, bid, item.Id, 18)
+	assert.Equal(t, err, sales.ErrInvalidItemCount)
+}
+
+func TestSalesService_RemoveItem_WhenBasketIdIsNil_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	err := ts.RemoveItem(ctx, uuid.Nil, uuid.NewV1(), 1)
+	assert.Equal(t, sales.ErrInvalidBasketId, err)
+}
+
+func TestSalesService_RemoveItem_WhenItemIdIsNil_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	err := ts.RemoveItem(ctx, uuid.NewV1(), uuid.Nil, 1)
+	assert.Equal(t, inventory.ErrInvalidItemId, err)
+}
+
+func TestSalesService_RemoveItem_WhenItemCountIsZero_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	err := ts.RemoveItem(ctx, uuid.NewV1(), uuid.NewV1(), 0)
+	assert.Equal(t, sales.ErrInvalidItemCount, err)
+}
+
+func TestSalesService_RemoveItem_WhenBasketIdNotExist_ThanShouldReturnErr(t *testing.T) {
+	ts := newMockedService()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	err := ts.RemoveItem(ctx, uuid.NewV1(), uuid.NewV1(), 2)
+	assert.Equal(t, sales.ErrInvalidBasketId, err)
+}

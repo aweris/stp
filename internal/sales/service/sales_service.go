@@ -79,3 +79,55 @@ func (ss *salesService) AddItem(ctx context.Context, basketId uuid.UUID, itemId 
 	ss.basketRepo.SaveBasket(ctx, basket)
 	return nil
 }
+
+func (ss *salesService) RemoveItem(ctx context.Context, basketId uuid.UUID, itemId uuid.UUID, itemCount int) (error) {
+	if basketId == uuid.Nil {
+		return sales.ErrInvalidBasketId
+	}
+	if itemId == uuid.Nil {
+		return inventory.ErrInvalidItemId
+	}
+	if itemCount <= 0 {
+		return sales.ErrInvalidItemCount
+	}
+
+	item, err := ss.invService.GetItemByID(ctx, itemId)
+	if err != nil {
+		return err
+	}
+
+	si, err := ss.taxService.GetSaleItem(ctx, item)
+	if err != nil {
+		return err
+	}
+
+	basket, err := ss.basketRepo.GetBasketByID(ctx, basketId)
+	if err != nil {
+		return err
+	}
+	if basket == nil {
+		return sales.ErrInvalidBasketId
+	}
+
+	bi := basket.Items[si.Id]
+
+	if bi == nil {
+		return inventory.ErrInvalidItemId
+	}
+
+	if bi.Count < itemCount {
+		return sales.ErrInvalidItemCount
+	}
+
+	bi.Count = bi.Count - itemCount
+
+	if bi.Count != 0 {
+		basket.Items[si.Id] = bi
+	} else {
+		delete(basket.Items, si.Id)
+	}
+
+	ss.basketRepo.SaveBasket(ctx, basket)
+
+	return nil
+}
