@@ -97,7 +97,9 @@ func LoadTestData(server *server.Server) {
 	server.SaleService.AddItem(context.Background(), bid1, c1CD.Id, 1)
 	server.SaleService.AddItem(context.Background(), bid1, c1Chocolate.Id, 1)
 
-	server.SaleService.CloseBasket(context.Background(), bid1)
+	r1, _ := server.SaleService.CloseBasket(context.Background(), bid1)
+
+	r1.Print()
 
 	// Case 2 items
 	c2Chocolate := &models.InventoryItem{
@@ -123,7 +125,8 @@ func LoadTestData(server *server.Server) {
 	server.SaleService.AddItem(context.Background(), bid2, c2Chocolate.Id, 1)
 	server.SaleService.AddItem(context.Background(), bid2, c2Perfume.Id, 1)
 
-	server.SaleService.CloseBasket(context.Background(), bid2)
+	r2, _ := server.SaleService.CloseBasket(context.Background(), bid2)
+	r2.Print()
 
 	// Case 3 items
 	c3PerfumeImport := &models.InventoryItem{
@@ -169,5 +172,6 @@ func LoadTestData(server *server.Server) {
 	server.SaleService.AddItem(context.Background(), bid3, c3Chocolate.Id, 3)
 	server.SaleService.AddItem(context.Background(), bid3, c3Pills.Id, 1)
 
-	server.SaleService.CloseBasket(context.Background(), bid3)
+	r3, _ := server.SaleService.CloseBasket(context.Background(), bid3)
+	r3.Print()
 }

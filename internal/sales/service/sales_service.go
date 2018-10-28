@@ -236,14 +236,9 @@ func (ss *salesService) CloseBasket(ctx context.Context, basketId uuid.UUID) (*m
 
 	for _, v := range basket.Items {
 		items = append(items, v)
-		subTax := v.Taxes.Mul(decimal.NewFromFloat32(float32(v.Count)))
-		totalTax = totalTax.Add(subTax)
-
-		subPrice := v.Price.Mul(decimal.NewFromFloat32(float32(v.Count)))
-		totalPrice = totalPrice.Add(subPrice)
-
-		subGross := v.Gross.Mul(decimal.NewFromFloat32(float32(v.Count)))
-		totalGross = totalGross.Add(subGross)
+		totalTax = totalTax.Add(v.TotalTax())
+		totalPrice = totalPrice.Add(v.TotalPrice())
+		totalGross = totalGross.Add(v.TotalGross())
 	}
 
 	receipt := &models.Receipt{
@@ -266,6 +261,7 @@ func (ss *salesService) CloseBasket(ctx context.Context, basketId uuid.UUID) (*m
 		log.WithFields(log.Fields{"basketId": basketId, "receipt": receipt}).WithError(err).Error("failed to close basket")
 		return receipt, err
 	}
+
 	log.WithFields(log.Fields{"basketId": basketId, "receipt": receipt}).Info("basket closed")
 	return receipt, nil
 }
