@@ -88,13 +88,8 @@ func (ah *ApiHandler) createTaxHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(fromTaxToDTO(nt))
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(fromTaxToDTO(nt))
 }
 
 func (ah *ApiHandler) updateTaxHandler(w http.ResponseWriter, r *http.Request) {
@@ -122,13 +117,8 @@ func (ah *ApiHandler) updateTaxHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(fromTaxToDTO(nt))
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(fromTaxToDTO(nt))
 }
 
 func (ah *ApiHandler) fetchTaxHandler(w http.ResponseWriter, r *http.Request) {
@@ -151,14 +141,8 @@ func (ah *ApiHandler) fetchTaxHandler(w http.ResponseWriter, r *http.Request) {
 		result = append(result, fromTaxToDTO(v))
 	}
 
-	// put tenant to bucket
-	data, err := json.Marshal(taxes)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(taxes)
 }
 
 func (ah *ApiHandler) deleteTaxHandler(w http.ResponseWriter, r *http.Request) {
@@ -190,13 +174,8 @@ func (ah *ApiHandler) deleteTaxHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(fromTaxToDTO(t))
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(fromTaxToDTO(t))
 }
 
 func (ah *ApiHandler) getTaxByIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -228,11 +207,6 @@ func (ah *ApiHandler) getTaxByIdHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	data, err := json.Marshal(fromTaxToDTO(t))
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(fromTaxToDTO(t))
 }

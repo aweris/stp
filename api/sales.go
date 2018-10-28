@@ -49,13 +49,8 @@ func (ah *ApiHandler) createBasketHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	data, err := json.Marshal(&BasketDTO{Id: bid})
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&BasketDTO{Id: bid})
 }
 
 func (ah *ApiHandler) getBasketHandler(w http.ResponseWriter, r *http.Request) {
@@ -87,13 +82,8 @@ func (ah *ApiHandler) getBasketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(t)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(t)
 }
 
 func (ah *ApiHandler) addItemToBasketHandler(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +154,7 @@ func (ah *ApiHandler) deleteItemFromBasketHandler(w http.ResponseWriter, r *http
 	err = ah.server.SaleService.RemoveItem(r.Context(), id, b.ItemId, b.Count)
 
 	if err != nil {
-		http.Error(w,  err.Error(), 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -220,7 +210,7 @@ func (ah *ApiHandler) closeBasketHandler(w http.ResponseWriter, r *http.Request)
 	receipt, err := ah.server.SaleService.CloseBasket(r.Context(), id)
 
 	if err != nil {
-		http.Error(w,  err.Error(), 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -229,13 +219,8 @@ func (ah *ApiHandler) closeBasketHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	data, err := json.Marshal(receipt)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(receipt)
 }
 
 func (ah *ApiHandler) fetchAllReceiptsHandler(w http.ResponseWriter, r *http.Request) {
@@ -248,7 +233,7 @@ func (ah *ApiHandler) fetchAllReceiptsHandler(w http.ResponseWriter, r *http.Req
 	receipts, err := ah.server.SaleService.FetchAllReceipts(r.Context())
 
 	if err != nil {
-		http.Error(w,  err.Error(), 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -257,13 +242,8 @@ func (ah *ApiHandler) fetchAllReceiptsHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	data, err := json.Marshal(receipts)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(receipts)
 }
 
 func (ah *ApiHandler) getReceiptHandler(w http.ResponseWriter, r *http.Request) {
@@ -286,7 +266,7 @@ func (ah *ApiHandler) getReceiptHandler(w http.ResponseWriter, r *http.Request) 
 	receipt, err := ah.server.SaleService.GetReceiptByID(r.Context(), id)
 
 	if err != nil {
-		http.Error(w,  err.Error(), 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -295,11 +275,6 @@ func (ah *ApiHandler) getReceiptHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	data, err := json.Marshal(receipt)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(receipt)
 }

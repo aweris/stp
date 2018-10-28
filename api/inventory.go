@@ -56,13 +56,8 @@ func (ah *ApiHandler) createCategoryHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	data, err := json.Marshal(nc)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(nc)
 }
 
 func (ah *ApiHandler) updateCategoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -90,13 +85,8 @@ func (ah *ApiHandler) updateCategoryHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	data, err := json.Marshal(uc)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(uc)
 }
 
 func (ah *ApiHandler) fetchCategoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,14 +103,8 @@ func (ah *ApiHandler) fetchCategoryHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// put tenant to bucket
-	data, err := json.Marshal(categories)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
 }
 
 func (ah *ApiHandler) deleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -152,13 +136,8 @@ func (ah *ApiHandler) deleteCategoryHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	data, err := json.Marshal(t)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(t)
 }
 
 func (ah *ApiHandler) getCategoryByIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -190,13 +169,8 @@ func (ah *ApiHandler) getCategoryByIdHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	data, err := json.Marshal(t)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(t)
 }
 
 func (ah *ApiHandler) getCategoryByNameHandler(w http.ResponseWriter, r *http.Request) {
@@ -222,13 +196,8 @@ func (ah *ApiHandler) getCategoryByNameHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	data, err := json.Marshal(c)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(c)
 }
 
 func (ah *ApiHandler) createItemHandler(w http.ResponseWriter, r *http.Request) {
@@ -256,13 +225,8 @@ func (ah *ApiHandler) createItemHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	data, err := json.Marshal(ni)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ni)
 }
 
 func (ah *ApiHandler) updateItemHandler(w http.ResponseWriter, r *http.Request) {
@@ -290,13 +254,8 @@ func (ah *ApiHandler) updateItemHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	data, err := json.Marshal(ui)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ui)
 }
 
 func (ah *ApiHandler) fetchItemHandler(w http.ResponseWriter, r *http.Request) {
@@ -313,14 +272,8 @@ func (ah *ApiHandler) fetchItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// put tenant to bucket
-	data, err := json.Marshal(categories)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
 }
 
 func (ah *ApiHandler) deleteItemHandler(w http.ResponseWriter, r *http.Request) {
@@ -351,14 +304,8 @@ func (ah *ApiHandler) deleteItemHandler(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-
-	data, err := json.Marshal(t)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(t)
 }
 
 func (ah *ApiHandler) getItemByIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -390,13 +337,8 @@ func (ah *ApiHandler) getItemByIdHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	data, err := json.Marshal(t)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(t)
 }
 
 func (ah *ApiHandler) getItemByCategoryIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -427,12 +369,6 @@ func (ah *ApiHandler) getItemByCategoryIdHandler(w http.ResponseWriter, r *http.
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-
-	data, err := json.Marshal(t)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	w.Write(data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(t)
 }
