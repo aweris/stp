@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/aweris/stp/api"
+	"github.com/aweris/stp/initialize"
 	"github.com/aweris/stp/internal/server"
 	"log"
 	"net/http"
@@ -40,6 +41,9 @@ func main() {
 			log.Println(err)
 		}
 	}()
+
+	//Loading Test data
+	initialize.LoadTestData(s)
 
 	log.Println("stp - ready ...")
 
