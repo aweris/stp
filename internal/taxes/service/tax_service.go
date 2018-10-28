@@ -8,6 +8,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+var (
+	twenty  = decimal.NewFromFloat32(20)
+	hundred = decimal.NewFromFloat32(100)
+)
+
 type taxService struct {
 	taxRepo taxes.TaxRepository
 }
@@ -104,9 +109,9 @@ func (ts *taxService) GetSaleItem(ctx context.Context, item *models.InventoryIte
 		rate = rate.Add(tax.Rate)
 	}
 
-	rate = rate.Div(decimal.NewFromFloat32(100))
+	rate = rate.Div(hundred)
 
-	taxAmount := item.Price.Mul(rate).RoundCash(5)
+	taxAmount := item.Price.Mul(rate).Mul(twenty).Ceil().Div(twenty).Round(2)
 
 	return &models.SaleItem{InventoryItem: item, Taxes: taxAmount, Gross: taxAmount.Add(item.Price)}, nil
 }
