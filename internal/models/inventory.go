@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 	"strings"
@@ -26,6 +27,22 @@ type InventoryItem struct {
 	CategoryId uuid.UUID       `json:"category"`
 	Origin     ItemOrigin      `json:"origin"`
 	Price      decimal.Decimal `json:"price"`
+}
+
+func (c *Category) String() string {
+	b, err := json.Marshal(c)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+func (i *InventoryItem) String() string {
+	b, err := json.Marshal(i)
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }
 
 func (io *ItemOrigin) UnmarshalText(b []byte) error {

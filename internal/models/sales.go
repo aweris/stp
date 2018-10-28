@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 )
@@ -35,4 +36,28 @@ type Receipt struct {
 	TotalTax   decimal.Decimal `json:"total_tax"`
 	TotalPrice decimal.Decimal `json:"total_price"`
 	TotalGross decimal.Decimal `json:"total_gross"`
+}
+
+func (basket *Basket) String() string {
+	b, err := json.Marshal(basket)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+func (bi *BasketItem) String() string {
+	b, err := json.Marshal(bi)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+func (r *Receipt) String() string {
+	b, err := json.Marshal(r)
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }

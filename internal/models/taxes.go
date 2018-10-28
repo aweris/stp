@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 	"strings"
@@ -39,6 +40,22 @@ type SaleItem struct {
 
 	Taxes decimal.Decimal `json:"taxes"`
 	Gross decimal.Decimal `json:"gross"`
+}
+
+func (t *Tax) String() string {
+	b, err := json.Marshal(t)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+func (si *SaleItem) String() string {
+	b, err := json.Marshal(si)
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }
 
 func (tt *TaxOrigin) UnmarshalText(b []byte) error {
