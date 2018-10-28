@@ -6,6 +6,7 @@ import (
 	"github.com/aweris/stp/internal/taxes"
 	"github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -24,21 +25,26 @@ func NewTaxService(taxRepo taxes.TaxRepository) taxes.TaxService {
 
 func (ts *taxService) CreateTax(ctx context.Context, tax *models.Tax) (*models.Tax, error) {
 	if tax == nil {
+		log.WithError(taxes.ErrInvalidParameter).Error("missing tax")
 		return nil, taxes.ErrInvalidParameter
 	}
 	if tax.Name == "" {
+		log.WithFields(log.Fields{"tax": tax}).WithError(taxes.ErrInvalidTaxName).Error("missing tax name")
 		return nil, taxes.ErrInvalidTaxName
 	}
 	if !tax.Rate.IsPositive() {
+		log.WithFields(log.Fields{"tax": tax}).WithError(taxes.ErrInvalidTaxRate).Error("invalid tax rate")
 		return nil, taxes.ErrInvalidTaxRate
 	}
 
 	if tax.Id != uuid.Nil {
 		exist, err := ts.taxRepo.GetTaxByID(ctx, tax.Id)
 		if err != nil {
+			log.WithFields(log.Fields{"tax": tax}).WithError(err).Error("failed to check existing taxes with given id")
 			return nil, err
 		}
 		if exist != nil {
+			log.WithFields(log.Fields{"tax": tax}).WithError(taxes.ErrInvalidTaxId).Error("tax find with given id")
 			return nil, taxes.ErrInvalidTaxId
 		}
 	} else {
@@ -53,12 +59,15 @@ func (ts *taxService) UpdateTax(ctx context.Context, tax *models.Tax) (*models.T
 		return nil, taxes.ErrInvalidParameter
 	}
 	if tax.Id == uuid.Nil {
+		log.WithFields(log.Fields{"tax": tax}).WithError(taxes.ErrInvalidTaxId).Error("missing tax id")
 		return nil, taxes.ErrInvalidTaxId
 	}
 	if tax.Name == "" {
+		log.WithFields(log.Fields{"tax": tax}).WithError(taxes.ErrInvalidTaxName).Error("missing tax name")
 		return nil, taxes.ErrInvalidTaxName
 	}
 	if !tax.Rate.IsPositive() {
+		log.WithFields(log.Fields{"tax": tax}).WithError(taxes.ErrInvalidTaxRate).Error("missing tax rate")
 		return nil, taxes.ErrInvalidTaxRate
 	}
 
@@ -67,6 +76,7 @@ func (ts *taxService) UpdateTax(ctx context.Context, tax *models.Tax) (*models.T
 		return nil, err
 	}
 	if exist == nil {
+		log.WithFields(log.Fields{"tax": tax}).WithError(taxes.ErrInvalidTaxId).Error("failed to find tax with given id")
 		return nil, taxes.ErrInvalidTaxId
 	}
 
@@ -75,6 +85,7 @@ func (ts *taxService) UpdateTax(ctx context.Context, tax *models.Tax) (*models.T
 
 func (ts *taxService) GetTaxByID(ctx context.Context, taxId uuid.UUID) (*models.Tax, error) {
 	if taxId == uuid.Nil {
+		log.WithError(taxes.ErrInvalidTaxId).Error("missing tax id")
 		return nil, taxes.ErrInvalidTaxId
 	}
 
@@ -87,6 +98,7 @@ func (ts *taxService) FetchAllTaxes(ctx context.Context) ([]*models.Tax, error) 
 
 func (ts *taxService) DeleteTax(ctx context.Context, taxId uuid.UUID) (*models.Tax, error) {
 	if taxId == uuid.Nil {
+		log.WithError(taxes.ErrInvalidTaxId).Error("missing tax id")
 		return nil, taxes.ErrInvalidTaxId
 	}
 
@@ -95,11 +107,13 @@ func (ts *taxService) DeleteTax(ctx context.Context, taxId uuid.UUID) (*models.T
 
 func (ts *taxService) GetSaleItem(ctx context.Context, item *models.InventoryItem) (*models.SaleItem, error) {
 	if item == nil {
+		log.WithError(taxes.ErrInvalidParameter).Error("missing item")
 		return nil, taxes.ErrInvalidParameter
 	}
 
 	taxes, err := ts.taxRepo.GetTaxesByItemOriginAndCategory(ctx, item.Origin, item.CategoryId)
 	if err != nil {
+		log.WithFields(log.Fields{"item": item}).WithError(err).Error("failed to get suitable taxes for item")
 		return nil, err
 	}
 

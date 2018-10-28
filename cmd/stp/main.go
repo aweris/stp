@@ -6,19 +6,31 @@ import (
 	"github.com/aweris/stp/api"
 	"github.com/aweris/stp/initialize"
 	"github.com/aweris/stp/internal/server"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 )
 
+func init() {
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.TextFormatter{})
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+
+	// Only log the warning severity or above.
+	log.SetLevel(log.InfoLevel)
+}
+
 func main() {
 	var wait time.Duration
 	flag.DurationVar(&wait, "graceful-timeout", time.Second*15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
 	flag.Parse()
 
-	log.Println("stp - starting ...")
+	log.Info("stp - starting server ...")
 
 	//TODO : add configuration for server and app settings
 
@@ -40,12 +52,13 @@ func main() {
 		if err := srv.ListenAndServe(); err != nil {
 			log.Println(err)
 		}
+		log.Info("stp - stopping server ...")
 	}()
 
 	//Loading Test data
 	initialize.LoadTestData(s)
 
-	log.Println("stp - ready ...")
+	log.Info("stp - server ready ...")
 
 	c := make(chan os.Signal, 1)
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
@@ -64,6 +77,6 @@ func main() {
 	// Optionally, you could run srv.Shutdown in a goroutine and block on
 	// <-ctx.Done() if your application should wait for other services
 	// to finalize based on context cancellation.
-	log.Println("stp - shutting down ...")
+	log.Info("stp - shutting down ...")
 	os.Exit(0)
 }
