@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"github.com/aweris/stp/api"
-	"github.com/aweris/stp/initialize"
 	"github.com/aweris/stp/internal/server"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -35,7 +34,7 @@ func main() {
 	//TODO : add configuration for server and app settings
 
 	//TODO : move path to config
-	s := server.NewServer("./data/local.store")
+	s := server.NewServer("./development.store")
 	apiHandler := api.NewHandler(s)
 
 	srv := &http.Server{
@@ -54,9 +53,6 @@ func main() {
 		}
 		log.Info("stp - stopping server ...")
 	}()
-
-	//Loading Test data
-	initialize.LoadTestData(s)
 
 	log.Info("stp - server ready ...")
 

@@ -1,6 +1,6 @@
 ## Application
 # local datastores for testing
-data/*.store
+*.store
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Go template

@@ -18,6 +18,7 @@ func NewHandler(s *server.Server) *ApiHandler {
 	api := &ApiHandler{server: s, router: mux.NewRouter(), timeout: time.Second * 5}
 
 	// initialize routes
+	api.registerDemoHandler()
 	api.registerHealthCheck()
 	api.registerInventoryRoutes()
 	api.registerTaxRoutes()
