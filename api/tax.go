@@ -84,7 +84,7 @@ func (ah *ApiHandler) createTaxHandler(w http.ResponseWriter, r *http.Request) {
 	nt, err := ah.server.TaxService.CreateTax(r.Context(), dto.toTax())
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -118,7 +118,7 @@ func (ah *ApiHandler) updateTaxHandler(w http.ResponseWriter, r *http.Request) {
 	nt, err := ah.server.TaxService.UpdateTax(r.Context(), dto.toTax())
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -141,7 +141,7 @@ func (ah *ApiHandler) fetchTaxHandler(w http.ResponseWriter, r *http.Request) {
 	taxes, err := ah.server.TaxService.FetchAllTaxes(r.Context())
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -181,7 +181,7 @@ func (ah *ApiHandler) deleteTaxHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := ah.server.TaxService.DeleteTax(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -219,7 +219,7 @@ func (ah *ApiHandler) getTaxByIdHandler(w http.ResponseWriter, r *http.Request) 
 	t, err := ah.server.TaxService.GetTaxByID(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 

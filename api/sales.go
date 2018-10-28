@@ -126,7 +126,7 @@ func (ah *ApiHandler) addItemToBasketHandler(w http.ResponseWriter, r *http.Requ
 	err = ah.server.SaleService.AddItem(r.Context(), id, b.ItemId, b.Count)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -164,7 +164,7 @@ func (ah *ApiHandler) deleteItemFromBasketHandler(w http.ResponseWriter, r *http
 	err = ah.server.SaleService.RemoveItem(r.Context(), id, b.ItemId, b.Count)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w,  err.Error(), 500)
 		return
 	}
 
@@ -220,7 +220,7 @@ func (ah *ApiHandler) closeBasketHandler(w http.ResponseWriter, r *http.Request)
 	receipt, err := ah.server.SaleService.CloseBasket(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w,  err.Error(), 500)
 		return
 	}
 
@@ -248,7 +248,7 @@ func (ah *ApiHandler) fetchAllReceiptsHandler(w http.ResponseWriter, r *http.Req
 	receipts, err := ah.server.SaleService.FetchAllReceipts(r.Context())
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w,  err.Error(), 500)
 		return
 	}
 
@@ -286,7 +286,7 @@ func (ah *ApiHandler) getReceiptHandler(w http.ResponseWriter, r *http.Request) 
 	receipt, err := ah.server.SaleService.GetReceiptByID(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w,  err.Error(), 500)
 		return
 	}
 

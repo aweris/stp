@@ -52,7 +52,7 @@ func (ah *ApiHandler) createCategoryHandler(w http.ResponseWriter, r *http.Reque
 	nc, err := ah.server.InventoryService.CreateCategory(r.Context(), &c)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -86,7 +86,7 @@ func (ah *ApiHandler) updateCategoryHandler(w http.ResponseWriter, r *http.Reque
 	uc, err := ah.server.InventoryService.UpdateCategory(r.Context(), &c)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (ah *ApiHandler) fetchCategoryHandler(w http.ResponseWriter, r *http.Reques
 	categories, err := ah.server.InventoryService.FetchAllCategories(r.Context())
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -143,7 +143,7 @@ func (ah *ApiHandler) deleteCategoryHandler(w http.ResponseWriter, r *http.Reque
 	t, err := ah.server.InventoryService.DeleteCategory(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -181,7 +181,7 @@ func (ah *ApiHandler) getCategoryByIdHandler(w http.ResponseWriter, r *http.Requ
 	t, err := ah.server.InventoryService.GetCategoryByID(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -213,7 +213,7 @@ func (ah *ApiHandler) getCategoryByNameHandler(w http.ResponseWriter, r *http.Re
 	c, err := ah.server.InventoryService.GetCategoryByName(r.Context(), categoryName)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -224,7 +224,7 @@ func (ah *ApiHandler) getCategoryByNameHandler(w http.ResponseWriter, r *http.Re
 
 	data, err := json.Marshal(c)
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -252,13 +252,13 @@ func (ah *ApiHandler) createItemHandler(w http.ResponseWriter, r *http.Request) 
 	ni, err := ah.server.InventoryService.CreateItem(r.Context(), &i)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
 	data, err := json.Marshal(ni)
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -286,7 +286,7 @@ func (ah *ApiHandler) updateItemHandler(w http.ResponseWriter, r *http.Request) 
 	ui, err := ah.server.InventoryService.UpdateItem(r.Context(), &i)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -309,7 +309,7 @@ func (ah *ApiHandler) fetchItemHandler(w http.ResponseWriter, r *http.Request) {
 	categories, err := ah.server.InventoryService.FetchAllItems(r.Context())
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -343,7 +343,7 @@ func (ah *ApiHandler) deleteItemHandler(w http.ResponseWriter, r *http.Request) 
 	t, err := ah.server.InventoryService.DeleteItem(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -381,7 +381,7 @@ func (ah *ApiHandler) getItemByIdHandler(w http.ResponseWriter, r *http.Request)
 	t, err := ah.server.InventoryService.GetItemByID(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
@@ -419,7 +419,7 @@ func (ah *ApiHandler) getItemByCategoryIdHandler(w http.ResponseWriter, r *http.
 	t, err := ah.server.InventoryService.GetItemsByCategoryID(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
