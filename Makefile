@@ -17,12 +17,15 @@ V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m▶\033[0m")
 
-.PHONY: clean test run fmt
-all: clean test build
+.PHONY: clean test get run fmt
+all: clean get test build
 
 clean:  ; $(info $(M) Cleaning ...)
 	$(Q) rm -rf $(DEV_DB) $(RELEASE_DIR)
 	$(Q) $(GOCLEAN)
+
+get: ; $(info $(M) Getting dependencies ...)
+	$(Q) dep ensure
 
 test: ; $(info $(M) Running tests ...)
 	$(Q) $(GOTEST) $(GOTEST_FILES)
