@@ -1,4 +1,4 @@
-# Sales Tax Problem
+# Sales Tax Problem [![GitHub license](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://github.com/aweris/std/blob/master/LICENSE)
 The idea of this project to create an example application solving "Sales Tax Problem."
 
 ## Problem
