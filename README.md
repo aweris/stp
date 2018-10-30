@@ -1,5 +1,5 @@
 # Sales Tax Problem
-The idea of this project creates example application solving "Sales Tax Problem."
+The idea of this project to create an example application solving "Sales Tax Problem."
 
 ## Problem
 
@@ -10,53 +10,84 @@ When I purchase items, I receive a receipt which lists the name of all the items
 
 ## Limitations
 
-* Data consistency between modules is limitted. There is no controll between modules about usage. You can delete data easily.
+* Data consistency between modules is limited. There is no control between modules about usage. You can delete data easily.
 
-* Configuration management in plans and because of that  currently some configuration is hardcoded.
+* Application configuration is mostly hardcoded but adding configuration management is in the TODO list.
 
 * Rest API is primitive so you can get errors that you shouldn't see. Error management is missing in API side
 
-## Prerequests
+## Prerequisites
+ For building or developing this application you need to install and configure following `go`, `dep` and `build-essentials`
 
-This project need following dependencies :
+## Installing / Getting started
 
-* go installation
-* `dep` dependency management
-* `build-essentials` for able to run __MakeFile__
+A quick introduction of the minimal setup you need to get  STP up & running.
 
-## How to Use
-  Some commands listed below but you can also check MakeFile for more info.
-
-* __Building Binaries:__
-
-You can run flowing commands for creating binaries. Binaries will be created under `$(Project_Dir)/release` folder.
+for OSX :
 
 ```bash
-make
+> make & bash -c release/stp-darwin-amd64
 ```
-or
+
+for Linux :
 
 ```bash
- make build
+> make & bash -c release/stp-linux-amd64
 ```
 
-* __Running App:__
+When you execute this commands, you'll create binaries under `$(PROJECT_DIR)`/release folder and execute binary.
 
-You can starting application without building. Application Server will be start at `8080`
+## Developing
+
+#### Setting up:
+
+```bash
+git clone https://github.com/aweris/stp.git
+cd stp/
+make get
+```
+
+#### Running App :
 
 ```bash
 make run
 ```
 
-* __Running Tests:__
-
-For running test
+#### Running Tests :
 
 ```bash
 make test
 ```
 
-* __Clean:__
+#### Building Binaries :
+
+##### Building All :
+
+```bash
+make
+```
+
+or
+
+```
+make build
+```
+
+the main difference between these 2 commands is `make` is running `clean`,`get,` `test` before starting the build
+
+##### Building only osx :
+
+```bash
+make build-darwin
+```
+
+##### Building only Linux :
+
+```bash
+make build-linux
+```
+
+#### Clean resources :
 
 Cleaning development store and release folder.
 
@@ -64,11 +95,11 @@ Cleaning development store and release folder.
 make clean
 ```
 
-* __Load Demo:__
+#### Load Demo:
 
-Triggers demo scenario in server. Nothing will return here. After you run this endpoint you can check demo data in server.
+Triggers a demo scenario in the server. After you run this endpoint, you can check demo data in the server.
 
-__NOTE__ Load demo imports spesific data. You should run only once. You can see it's output in application logs. After loading data you can use rest api.
+__NOTE__ Load demo imports specific data. You should run only once. You can see it's output in application logs. After loading data, you can use Rest API. You need to run `make clean` for reset development db.
 
 ```bash
 curl -X POST http://localhost:8080/demo
@@ -76,4 +107,4 @@ curl -X POST http://localhost:8080/demo
 
 ## Docs
 
-You can find more info in [docs](https://documenter.getpostman.com/view/5717174/RzZ1rNiG) about rest api
+You can find more info in [docs](https://documenter.getpostman.com/view/5717174/RzZ1rNiG) about rest API
