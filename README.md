@@ -17,7 +17,7 @@ When I purchase items, I receive a receipt which lists the name of all the items
 * Rest API is primitive so you can get errors that you shouldn't see. Error management is missing in API side
 
 ## Prerequisites
- For building or developing this application you need to install and configure following `go`, `dep` and `build-essentials`
+ For building or developing this application you need to install and configure following `go`, `dep` and `build-essential`
 
 ## Installing / Getting started
 
